@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMU Admin Dashboard</title>
+    <link rel="stylesheet" href="css/admin-styles.css">
+    <!-- Include Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="profile-pic"></div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item">
+                    <i data-lucide="user"></i>
+                    Profile
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="bell"></i>
+                    Notifications
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="shield"></i>
+                    Sign-in & Security
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="help-circle"></i>
+                    Help
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="settings"></i>
+                    Account Settings
+                </a>
+            </nav>
+            <button class="logout-btn">
+                <i data-lucide="log-out"></i>
+                Log Out
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header-container">
+                <h1>Welcome to Admin Dashboard</h1>
+                <button class="create-group-btn">
+                    + Create Group
+                    <i data-lucide="chevron-down"></i>
+                </button>
+            </div>
+
+            <!-- Current Groups Section -->
+            <section class="groups-section">
+                <h2>Current Groups</h2>
+                <div class="groups-grid current-groups">
+                    <!-- Cards will be populated by JavaScript -->
+                </div>
+                <button class="see-all-btn" data-section="current">See All</button>
+            </section>
+
+            <!-- Previous Groups Section -->
+            <section class="groups-section">
+                <h2>Previous Groups</h2>
+                <div class="groups-grid previous-groups">
+                    <!-- Cards will be populated by JavaScript -->
+                </div>
+                <button class="see-all-btn" data-section="previous">See All</button>
+            </section>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="messages-section">
+                <h3>
+                    <i data-lucide="message-square"></i>
+                    Messages
+                </h3>
+                <p class="no-messages">No new messages</p>
+            </div>
+            <div class="requests-section">
+                <h3>
+                    <i data-lucide="clipboard-list"></i>
+                    Requests
+                </h3>
+                <p class="no-requests">No new requests</p>
+            </div>
+        </aside>
+    </div>
+    <script src="js/admin.js"></script>
+</body>
+</html>

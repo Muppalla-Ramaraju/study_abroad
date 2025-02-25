@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMU Dashboard</title>
+    <link rel="stylesheet" href="css/student-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="profile">
+                <div class="profile-pic"></div>
+                <button class="copy-btn">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            
+            <nav class="nav-menu">
+                <button><i class="fas fa-user"></i> Profile</button>
+                <button><i class="fas fa-bell"></i> Notifications</button>
+                <button><i class="fas fa-shield-alt"></i> Sign-in & Security</button>
+                <button><i class="fas fa-question-circle"></i> Help</button>
+                <button><i class="fas fa-cog"></i> Account Settings</button>
+            </nav>
+
+            <!-- Logout Button -->
+            <button class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Log Out
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1>Welcome to Your Dashboard</h1>
+
+            <!-- Pending Tasks Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clock"></i> Pending Tasks</h2>
+                </div>
+                <div class="card-content">
+                    <div class="task">
+                        <span>Submit Weekly Report</span>
+                        <span class="due">Due in 2 days</span>
+                    </div>
+                    <div class="task">
+                        <span>Update Contact Information</span>
+                        <span class="overdue">Overdue</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Location Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-map-marker-alt"></i> Current Location</h2>
+                    <button id="getLocation" class="location-btn">Get Current Location</button>
+                </div>
+                <div class="card-content">
+                    <div class="location-info">
+                        <h3>Location Coordinates</h3>
+                        <div class="coordinates">
+                            <span id="coordinates">30.629317,-96.3595236</span>
+                            <button class="copy-btn" title="Copy coordinates">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <a href="#" class="maps-link">Open in Google Maps</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Details Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-info-circle"></i> Additional Details</h2>
+                    <button id="editDetails" class="edit-btn">
+                        <i class="fas fa-edit"></i> Update Details
+                    </button>
+                </div>
+                <div class="card-content">
+                    <div class="details-container">
+                        <!-- View Mode -->
+                        <div id="viewMode" class="details-view">
+                            <div class="detail-item">
+                                <label>With Whom</label>
+                                <p id="withWhomText">Parents</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Current Place</label>
+                                <p id="currentPlaceText">123 Main St, College Station, TX 77840</p>
+                            </div>
+                            <div class="detail-item">
+                                <label>Additional Comments</label>
+                                <p id="commentsText">No additional comments</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Edit Mode (initially hidden) -->
+                        <div id="editMode" class="details-edit hidden">
+                            <div class="detail-item">
+                                <label>With Whom</label>
+                                <input type="text" id="withWhomInput" value="Parents">
+                            </div>
+                            <div class="detail-item">
+                                <label>Current Place</label>
+                                <input type="text" id="currentPlaceInput" value="123 Main St, College Station, TX 77840">
+                            </div>
+                            <div class="detail-item">
+                                <label>Additional Comments</label>
+                                <textarea id="commentsInput" placeholder="Add your comments here..."></textarea>
+                            </div>
+                            <div class="edit-actions">
+                                <button id="saveDetails" class="save-btn">Save Changes</button>
+                                <button id="cancelEdit" class="cancel-btn">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-message"></i> Messages</h2>
+                </div>
+                <div class="card-content">
+                    <p class="no-content">No new messages</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clipboard-list"></i> Requests</h2>
+                </div>
+                <div class="card-content">
+                    <p class="no-content">No new requests</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/student.js"></script>
+</body>
+</html>
