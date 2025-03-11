@@ -1,8 +1,9 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Session validation
     const idToken = localStorage.getItem('idToken');
     const userRole = localStorage.getItem('userRole');
     if (!idToken || userRole !== 'faculty') {
+        alert('You are not logged in or not authorized to access this page.');
         window.location.href = 'login.html';
         return;
     }
@@ -12,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.getElementById('profilePic');
 
     if (profilePicInput && profilePic) {
-        profilePicInput.addEventListener('change', function(e) {
+        profilePicInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 // Validate file type
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Please select an image file');
                     return;
                 }
-                
+
                 // Validate file size (5MB max)
                 if (file.size > 5 * 1024 * 1024) {
                     alert('Please select an image smaller than 5MB');
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     profilePic.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
@@ -39,12 +40,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Navigation Menu Active State
     const navItems = document.querySelectorAll('.nav-item');
     const mainContent = document.querySelector('.main-content');
-    
+
     navItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function () {
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
-            
+
             const pageType = this.textContent.trim();
             if (pageType === 'Dashboard') {
                 mainContent.style.display = 'block';
@@ -60,14 +61,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const customCheckin = document.getElementById('customCheckin');
 
     if (presetCheckin) {
-        presetCheckin.addEventListener('click', function(e) {
+        presetCheckin.addEventListener('click', function (e) {
             e.preventDefault();
             showCheckinModal('preset');
         });
     }
 
     if (customCheckin) {
-        customCheckin.addEventListener('click', function(e) {
+        customCheckin.addEventListener('click', function (e) {
             e.preventDefault();
             showCheckinModal('custom');
         });
@@ -76,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showCheckinModal(type) {
         const modal = document.createElement('div');
         modal.className = 'modal';
-        
+
         let formContent = '';
         if (type === 'preset') {
             formContent = `
@@ -88,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </select>
             `;
         }
-        
+
         modal.innerHTML = `
             <div class="modal-content">
                 <h2>${type === 'preset' ? 'Select Preset Check-in' : 'Create New Check-in'}</h2>
@@ -105,43 +106,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 </form>
             </div>
         `;
-        
+
         document.body.appendChild(modal);
-        
+
         const form = modal.querySelector('form');
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             e.preventDefault();
             // Add your form submission logic here (e.g., API call)
             console.log('Check-in submitted:', new FormData(this));
             document.body.removeChild(modal);
         });
-        
-        const cancelBtn = modal.querySelector('.cancel');
-        cancelBtn.addEventListener('click', function() {
-            document.body.removeChild(modal);
-        });
-    }
 
-    // Logout Button
-    const logoutBtn = document.querySelector('.logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to log out?')) {
-                // Clear session
-                localStorage.removeItem('idToken');
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
-                localStorage.removeItem('userRole');
-                // Redirect to login page
-                window.location.href = 'login.html'; // Updated to match your file structure
-            }
+        const cancelBtn = modal.querySelector('.cancel');
+        cancelBtn.addEventListener('click', function () {
+            document.body.removeChild(modal);
         });
     }
 
     // Course Card Click Handler
     const courseCards = document.querySelectorAll('.course-card');
     courseCards.forEach(card => {
-        card.addEventListener('click', function() {
+        card.addEventListener('click', function () {
             const courseCode = this.querySelector('h3').textContent;
             loadCourseDetails(courseCode);
         });
@@ -150,10 +135,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Table Row Hover Effect
     const tableRows = document.querySelectorAll('tbody tr');
     tableRows.forEach(row => {
-        row.addEventListener('mouseover', function() {
+        row.addEventListener('mouseover', function () {
             this.style.backgroundColor = 'var(--gray-100)';
         });
-        row.addEventListener('mouseout', function() {
+        row.addEventListener('mouseout', function () {
             this.style.backgroundColor = '';
         });
     });
@@ -178,6 +163,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check for notifications every 5 minutes
     setInterval(checkNotifications, 300000);
+
+    // Logout Button
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function () {
+            if (confirm('Are you sure you want to log out?')) {
+                // Clear session
+                localStorage.removeItem('idToken');
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('userRole');
+                // Redirect to login page
+                window.location.href = 'login.html'; // Updated to match your file structure
+            }
+        });
+    }
+
+    // Token refresh function
+    async function refreshTokens() {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) return false;
+
+        try {
+            const response = await fetch('https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/refresh', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken, action: 'refresh' })
+            });
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('idToken', data.idToken);
+                localStorage.setItem('accessToken', data.accessToken);
+                return true;
+            }
+            throw new Error('Token refresh failed');
+        } catch (error) {
+            console.error('Refresh error:', error);
+            localStorage.clear();
+            window.location.href = 'login.html';
+            return false;
+        }
+    }
+
+    // Periodically check token expiration and refresh if needed
+    setInterval(() => {
+        const tokenExpiresIn = localStorage.getItem('tokenExpiresIn');
+        if (tokenExpiresIn && parseInt(tokenExpiresIn) < Date.now() / 1000 + 60) { // Refresh 1 minute before expiration
+            refreshTokens();
+        }
+    }, 5 * 60 * 1000); // Check every 5 minutes
 });
 
 // Add CSS for modal

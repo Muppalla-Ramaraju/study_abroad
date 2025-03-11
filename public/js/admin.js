@@ -1,34 +1,73 @@
-// Initialize Lucide icons
-document.addEventListener('DOMContentLoaded', () => {
-    // Session validation (added)
+document.addEventListener('DOMContentLoaded', function () {
+    // Session validation
     const idToken = localStorage.getItem('idToken');
     const userRole = localStorage.getItem('userRole')?.toLowerCase();
     if (!idToken || userRole !== 'admin') {
+        alert('You are not logged in or not authorized to access this page.');
         window.location.href = 'login.html';
         return;
     }
 
     lucide.createIcons();
-    
+
     // Populate cards for both sections
     populateGroups();
-    
+
     // Setup see all buttons
     setupSeeAllButtons();
-    
+
     // Setup create group button
     setupCreateGroupButton();
 
-    // Logout button functionality (added)
+    // Logout button functionality
     const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
+        logoutBtn.addEventListener('click', function () {
             if (confirm('Are you sure you want to log out?')) {
-                localStorage.clear(); // Clear session
-                window.location.href = 'login.html'; // Redirect to login
+                // Clear session
+                localStorage.removeItem('idToken');
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('userRole');
+                // Redirect to login page
+                window.location.href = 'login.html'; // Updated to match your file structure
             }
         });
     }
+
+    // Token refresh function
+    async function refreshTokens() {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) return false;
+
+        try {
+            const response = await fetch('https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/refresh', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken, action: 'refresh' })
+            });
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('idToken', data.idToken);
+                localStorage.setItem('accessToken', data.accessToken);
+                return true;
+            }
+            throw new Error('Token refresh failed');
+        } catch (error) {
+            console.error('Refresh error:', error);
+            localStorage.clear();
+            window.location.href = 'login.html';
+            return false;
+        }
+    }
+
+    // Periodically check token expiration and refresh if needed
+    setInterval(() => {
+        const tokenExpiresIn = localStorage.getItem('tokenExpiresIn');
+        if (tokenExpiresIn && parseInt(tokenExpiresIn) < Date.now() / 1000 + 60) { // Refresh 1 minute before expiration
+            refreshTokens();
+        }
+    }, 5 * 60 * 1000); // Check every 5 minutes
 });
 
 // Sample data for groups - 6 items in each array
@@ -126,40 +165,40 @@ const previousGroups = [
 function populateGroups() {
     const currentGroupsContainer = document.querySelector('.current-groups');
     const previousGroupsContainer = document.querySelector('.previous-groups');
-    
+
     // Clear existing content
     currentGroupsContainer.innerHTML = '';
     previousGroupsContainer.innerHTML = '';
-    
+
     // Add current groups (initially first 3)
     currentGroups.forEach((group, index) => {
         const card = createCard(group);
-        
+
         // Hide groups after first 3
         if (index >= 3) {
             card.classList.add('row-hidden');
         }
-        
+
         currentGroupsContainer.appendChild(card);
     });
-    
+
     // Add previous groups (initially first 3)
     previousGroups.forEach((group, index) => {
         const card = createCard(group);
-        
+
         // Hide groups after first 3
         if (index >= 3) {
             card.classList.add('row-hidden');
         }
-        
+
         previousGroupsContainer.appendChild(card);
     });
-    
+
     // Hide "See All" buttons if there are 3 or fewer groups
     if (currentGroups.length <= 3) {
         document.querySelector('.see-all-btn[data-section="current"]').classList.add('hidden');
     }
-    
+
     if (previousGroups.length <= 3) {
         document.querySelector('.see-all-btn[data-section="previous"]').classList.add('hidden');
     }
@@ -170,7 +209,7 @@ function createCard(group) {
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('data-id', group.id);
-    
+
     card.innerHTML = `
         <h3>${group.name}</h3>
         <div class="card-info">
@@ -179,9 +218,9 @@ function createCard(group) {
             <p>Last Active: <span>${group.lastActive}</span></p>
         </div>
     `;
-    
+
     card.addEventListener('click', () => handleCardClick(group));
-    
+
     return card;
 }
 
@@ -194,18 +233,18 @@ function handleCardClick(group) {
 // Setup see all buttons functionality
 function setupSeeAllButtons() {
     const seeAllButtons = document.querySelectorAll('.see-all-btn');
-    
+
     seeAllButtons.forEach(button => {
         button.addEventListener('click', () => {
             const section = button.getAttribute('data-section');
             const container = document.querySelector(`.${section}-groups`);
             const hiddenCards = container.querySelectorAll('.row-hidden');
-            
+
             // Show all hidden cards
             hiddenCards.forEach(card => {
                 card.classList.remove('row-hidden');
             });
-            
+
             // Hide the "See All" button after it's clicked
             button.classList.add('hidden');
         });
@@ -215,7 +254,7 @@ function setupSeeAllButtons() {
 // Setup create group button functionality
 function setupCreateGroupButton() {
     const createGroupBtn = document.querySelector('.create-group-btn');
-    
+
     if (createGroupBtn) {
         createGroupBtn.addEventListener('click', () => {
             console.log('Create group button clicked');
