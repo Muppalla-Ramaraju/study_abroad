@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
                 if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
                 if (data.role) localStorage.setItem('userRole', data.role);
-                if (data.expiresIn) localStorage.setItem('tokenExpiresIn', data.expiresIn);
 
                 loginStatus.innerText = 'Successfully Logged In';
                 loginStatus.style.color = 'green';
@@ -81,37 +80,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Token refresh function
-    async function refreshTokens() {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) return false;
-
-        try {
-            const response = await fetch('https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/refresh', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken, action: 'refresh' })
-            });
-            const data = await response.json();
-            if (data.success) {
-                localStorage.setItem('idToken', data.idToken);
-                localStorage.setItem('accessToken', data.accessToken);
-                return true;
-            }
-            throw new Error('Token refresh failed');
-        } catch (error) {
-            console.error('Refresh error:', error);
-            localStorage.clear();
-            window.location.href = 'login.html';
-            return false;
-        }
-    }
-
-    // Periodically check token expiration and refresh if needed
-    setInterval(() => {
-        const tokenExpiresIn = localStorage.getItem('tokenExpiresIn');
-        if (tokenExpiresIn && parseInt(tokenExpiresIn) < Date.now() / 1000 + 60) { // Refresh 1 minute before expiration
-            refreshTokens();
-        }
-    }, 5 * 60 * 1000); // Check every 5 minutes
+        
 });
