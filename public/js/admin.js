@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 localStorage.removeItem('refreshToken');
                 localStorage.removeItem('userRole');
                 // Redirect to login page
-                window.location.href = 'login.html'; // Updated to match your file structure
+                window.location.href = 'login.html';
             }
         });
     }
