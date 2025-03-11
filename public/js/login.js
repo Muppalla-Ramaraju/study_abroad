@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
                 if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
                 if (data.role) localStorage.setItem('userRole', data.role);
+                if (data.expiresIn) localStorage.setItem('tokenExpiresIn', data.expiresIn);
 
                 loginStatus.innerText = 'Successfully Logged In';
                 loginStatus.style.color = 'green';
@@ -80,8 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Optional: Token refresh function (uncomment and adjust endpoint if needed)
-    /*
+    // Token refresh function
     async function refreshTokens() {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) return false;
@@ -106,5 +106,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
     }
-    */
+
+    // Periodically check token expiration and refresh if needed
+    setInterval(() => {
+        const tokenExpiresIn = localStorage.getItem('tokenExpiresIn');
+        if (tokenExpiresIn && parseInt(tokenExpiresIn) < Date.now() / 1000 + 60) { // Refresh 1 minute before expiration
+            refreshTokens();
+        }
+    }, 5 * 60 * 1000); // Check every 5 minutes
 });
