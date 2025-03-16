@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('loginForm');
     const loginStatus = document.createElement('div');
     loginStatus.id = 'loginStatus';
     loginForm.appendChild(loginStatus); // Place status inside form for styling
 
-    loginForm.addEventListener('submit', async function(e) {
+    loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const email = document.getElementById('email').value;
@@ -23,11 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!password) throw new Error('Please enter a password');
 
             // Authenticate with Lambda
-            const response = await fetch('https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, remember })
-            });
+            const response = await fetch(
+                'https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/login',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, remember }),
+                }
+            );
 
             const data = await response.json();
             console.log('Login response:', data); // Debug response
@@ -36,8 +39,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Establish session by storing tokens in localStorage
                 if (data.idToken) localStorage.setItem('idToken', data.idToken);
                 if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
-                if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+                if (data.refreshToken && remember) {
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                }
                 if (data.role) localStorage.setItem('userRole', data.role);
+
+                // Store token expiration time
+                if (data.expiresIn) {
+                    localStorage.setItem(
+                        'tokenExpiresAt',
+                        Date.now() + data.expiresIn * 1000
+                    ); // Convert seconds to milliseconds
+                }
 
                 loginStatus.innerText = 'Successfully Logged In';
                 loginStatus.style.color = 'green';
@@ -64,21 +77,64 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Login error:', error);
-            loginStatus.innerText = 'Error logging in: ' + (error.message || 'Unknown error occurred');
+            loginStatus.innerText =
+                'Error logging in: ' + (error.message || 'Unknown error occurred');
             loginStatus.style.color = 'red';
         } finally {
             submitButton.disabled = false; // Re-enable button
         }
     });
 
-    // Handle signup link
-    const signupLink = document.querySelector('.signup-link');
-    if (signupLink) {
-        signupLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.location.href = 'signup.html';
-        });
+    // Periodically check token expiration and refresh tokens if needed
+    setInterval(async () => {
+        const tokenExpiresAt = parseInt(localStorage.getItem('tokenExpiresAt'), 10);
+        if (tokenExpiresAt && Date.now() > tokenExpiresAt - 60 * 1000) {
+            console.log('Refreshing tokens...');
+            await refreshTokens(); // Refresh tokens 1 minute before expiration
+        }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+
+    // Function to refresh tokens using the refresh token
+    async function refreshTokens() {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) return; // No refresh token available
+
+        try {
+            const response = await fetch(
+                'https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/login',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken, action: 'refresh' }),
+                }
+            );
+
+            const data = await response.json();
+            console.log('Refresh response:', data);
+
+            if (data.success) {
+                if (data.idToken) localStorage.setItem('idToken', data.idToken);
+                if (data.accessToken)
+                    localStorage.setItem('accessToken', data.accessToken);
+                if (data.expiresIn) {
+                    localStorage.setItem(
+                        'tokenExpiresAt',
+                        Date.now() + data.expiresIn * 1000
+                    );
+                }
+            } else {
+                console.error('Failed to refresh tokens:', data.message);
+                logout(); // Clear session and redirect to login
+            }
+        } catch (error) {
+            console.error('Error refreshing tokens:', error);
+            logout(); // Clear session and redirect to login on failure
+        }
     }
 
-        
+    // Logout function to clear session and redirect to login page
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
 });
