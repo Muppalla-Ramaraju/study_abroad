@@ -1,10 +1,34 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Session validation
     const idToken = localStorage.getItem('idToken');
     const userRole = localStorage.getItem('userRole');
+    const tokenExpiresAt = parseInt(localStorage.getItem('tokenExpiresAt'), 10);
+
+    // Check if session is expired and try refreshing the token
     if (!idToken || userRole !== 'student') {
-        window.location.href = 'login.html';
+        logout();  // No token or invalid role, log out immediately
         return;
+    }
+
+    // If the token has expired, try to refresh it first
+    if (Date.now() > tokenExpiresAt) {
+        console.log('Token expired. Trying to refresh...');
+        try {
+            const refreshSuccess = await refreshTokens();
+            if (refreshSuccess) {
+                // Token successfully refreshed
+                console.log('Token refreshed successfully');
+                return; // Continue with the session without logging out
+            } else {
+                console.log('Failed to refresh token');
+                logout(); // Logout if refresh fails
+                return;
+            }
+        } catch (error) {
+            console.error('Error during token refresh:', error);
+            logout(); // Logout on error
+            return;
+        }
     }
 
     // Get Location Button
@@ -118,13 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutBtn = document.querySelector('.logout-btn');
     logoutBtn.addEventListener('click', function() {
         if (confirm('Are you sure you want to log out?')) {
-            // Clear session
-            localStorage.removeItem('idToken');
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('userRole');
-            // Redirect to login page
-            window.location.href = 'login.html'; // Updated to match your file structure
+            logout(); // Logout action
         }
     });
 
@@ -136,5 +154,66 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.height = (this.scrollHeight) + 'px';
         });
     }
-    
+
+    // Periodically check token expiration and refresh tokens if needed
+    setInterval(async () => {
+        const tokenExpiresAt = parseInt(localStorage.getItem('tokenExpiresAt'), 10);
+        if (tokenExpiresAt && Date.now() > tokenExpiresAt - 60 * 1000) {
+            console.log('Refreshing tokens...');
+            const refreshSuccess = await refreshTokens();
+            if (!refreshSuccess) {
+                console.log('Failed to refresh token');
+            }
+        }
+    }, 1 * 60 * 1000); // Check every minute
+
+    // Function to refresh tokens using the refresh token
+    async function refreshTokens() {
+        const refreshToken = localStorage.getItem('refreshToken');
+        const email = localStorage.getItem('email');
+        if (!refreshToken) {
+            console.error('No refresh token available');
+            return false; // No refresh token available
+        }
+
+        try {
+            const response = await fetch(
+                'https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/refresh',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, refreshToken, action: 'refresh' }),
+                }
+            );
+
+            const data = await response.json();
+            console.log('Refresh response:', data);
+
+            if (data.success) {
+                if (data.idToken) localStorage.setItem('idToken', data.idToken);
+                if (data.accessToken)
+                    localStorage.setItem('accessToken', data.accessToken);
+                if (data.expiresIn) {
+                    
+                    localStorage.setItem(
+                        'tokenExpiresAt',
+                        Date.now() + data.expiresIn * 1000
+                    );
+                }
+                return true; // Successfully refreshed tokens
+            } else {
+                console.error('Failed to refresh tokens:', data.message);
+                return false; // Failed to refresh tokens
+            }
+        } catch (error) {
+            console.error('Error refreshing tokens:', error);
+            return false; // Error during refresh
+        }
+    }
+
+    // Logout function
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html'; // Updated to match your file structure
+    }
 });

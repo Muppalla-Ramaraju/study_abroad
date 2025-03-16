@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (data.success) {
                 // Establish session by storing tokens in localStorage
+                localStorage.setItem('email', email);
                 if (data.idToken) localStorage.setItem('idToken', data.idToken);
                 if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
                 if (data.refreshToken && remember) {
@@ -44,13 +45,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 if (data.role) localStorage.setItem('userRole', data.role);
 
-                // Store token expiration time
+                // Set token expiration time 
                 if (data.expiresIn) {
                     localStorage.setItem(
                         'tokenExpiresAt',
                         Date.now() + data.expiresIn * 1000
-                    ); // Convert seconds to milliseconds
+                    );
                 }
+                
 
                 loginStatus.innerText = 'Successfully Logged In';
                 loginStatus.style.color = 'green';
@@ -101,11 +103,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             const response = await fetch(
-                'https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/login',
+                'https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/refresh',
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ refreshToken, action: 'refresh' }),
+                    body: JSON.stringify({ email, refreshToken, action: 'refresh' }),
                 }
             );
 

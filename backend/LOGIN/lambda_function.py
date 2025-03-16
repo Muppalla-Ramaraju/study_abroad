@@ -88,7 +88,8 @@ def lambda_handler(event, context):
                     "idToken": tokens.get('IdToken'),
                     "accessToken": tokens.get('AccessToken'),
                     "refreshToken": tokens.get('RefreshToken') if body.get('remember', False) else None,
-                    "role": role
+                    "role": role,
+                    "expiresIn": tokens.get('ExpiresIn')  # Include expiry time
                 })
             }
     except cognito.exceptions.NotAuthorizedException as e:
