@@ -1,11 +1,37 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Session validation
-    const idToken = localStorage.getItem('idToken');
-    const userRole = localStorage.getItem('userRole');
+import { getSession, refreshTokens, logout, initSessionChecker } from './session.js';
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // Get session data
+    const { idToken, userRole, tokenExpiresAt } = getSession();
+
+    // Check if session is expired or invalid
     if (!idToken || userRole !== 'faculty') {
-        window.location.href = 'login.html';
+        logout();  // No token or invalid role, log out immediately
         return;
     }
+
+    // If the token is about to expire within the next minute, try to refresh it first
+    /*if (Date.now() > tokenExpiresAt - 60 * 1000) {
+        console.log('Token is about to expire. Trying to refresh...');
+        try {
+            const refreshSuccess = await refreshTokens();
+            if (refreshSuccess) {
+                // Token successfully refreshed
+                console.log('Token refreshed successfully');
+            } else {
+                console.log('Failed to refresh token');
+                logout(); // Logout if refresh fails
+                return;
+            }
+        } catch (error) {
+            console.error('Error during token refresh:', error);
+            logout(); // Logout on error
+            return;
+        }
+    }*/
+
+    // Initialize session checker to periodically check token expiration and refresh tokens if needed
+    initSessionChecker();
 
     // Profile Picture Upload
     const profilePicInput = document.getElementById('profilePicInput');
@@ -127,13 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function() {
             if (confirm('Are you sure you want to log out?')) {
-                // Clear session
-                localStorage.removeItem('idToken');
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
-                localStorage.removeItem('userRole');
-                // Redirect to login page
-                window.location.href = 'login.html'; // Updated to match your file structure
+                logout(); // Logout action
             }
         });
     }

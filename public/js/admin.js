@@ -1,31 +1,56 @@
-// Initialize Lucide icons
-document.addEventListener('DOMContentLoaded', () => {
-    // Session validation (added)
-    const idToken = localStorage.getItem('idToken');
-    const userRole = localStorage.getItem('userRole')?.toLowerCase();
+import { getSession, refreshTokens, logout, initSessionChecker } from './session.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Get session data
+    const { idToken, userRole, tokenExpiresAt } = getSession();
+    
+    // Check if session is expired or invalid
     if (!idToken || userRole !== 'admin') {
+        logout();
         window.location.href = 'login.html';
         return;
     }
 
+    // If the token is about to expire within the next minute, try to refresh it first
+    /*if (Date.now() > tokenExpiresAt - 60 * 1000) {
+        console.log('Token is about to expire. Trying to refresh...');
+        try {
+            const refreshSuccess = await refreshTokens();
+            if (refreshSuccess) {
+                // Token successfully refreshed
+                console.log('Token refreshed successfully');
+            } else {
+                console.log('Failed to refresh token');
+                logout(); // Logout if refresh fails
+                return;
+            }
+        } catch (error) {
+            console.error('Error during token refresh:', error);
+            logout(); // Logout on error
+            return;
+        }
+    }*/
+
+    // Initialize session checker to periodically check token expiration and refresh tokens if needed
+    initSessionChecker();
+
     lucide.createIcons();
-    
+
     // Populate cards for both sections
     populateGroups();
-    
+
     // Setup see all buttons
     setupSeeAllButtons();
-    
+
     // Setup create group button
     setupCreateGroupButton();
 
-    // Logout button functionality (added)
+    // Logout button functionality
     const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
+        logoutBtn.addEventListener('click', () => {
             if (confirm('Are you sure you want to log out?')) {
-                localStorage.clear(); // Clear session
-                window.location.href = 'login.html'; // Redirect to login
+                logout(); // Logout action
             }
         });
     }
