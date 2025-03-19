@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Authenticate with Lambda
             const response = await fetch(
-                'https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/login',
+                'https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/auth/login',
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

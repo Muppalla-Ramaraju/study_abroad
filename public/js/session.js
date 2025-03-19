@@ -45,7 +45,7 @@ async function refreshTokens() {
         console.log('Attempting to refresh tokens with:', { email, refreshToken });
 
         const response = await fetch(
-            'https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/refresh',
+            'https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/auth/refresh',
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

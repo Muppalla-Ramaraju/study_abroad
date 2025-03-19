@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Constants
-    const API_ENDPOINT = 'https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/auth/reset-password';
+    const API_ENDPOINT = 'https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/auth/resetpwd';
     
     // Elements
     const resetForm = document.getElementById('resetForm');

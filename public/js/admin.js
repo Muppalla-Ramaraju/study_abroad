@@ -188,6 +188,22 @@ function populateGroups() {
     if (previousGroups.length <= 3) {
         document.querySelector('.see-all-btn[data-section="previous"]').classList.add('hidden');
     }
+
+    // Refresh "See All" button visibility
+    const currentSeeAllBtn = document.querySelector('.see-all-btn[data-section="current"]');
+    if (currentGroups.length > 3) {
+        currentSeeAllBtn.classList.remove('hidden');
+    } else {
+        currentSeeAllBtn.classList.add('hidden');
+    }
+
+    // Update last active time
+    const lastActiveElements = document.querySelectorAll('.last-active');
+    lastActiveElements.forEach(element => {
+        const lastActive = new Date(element.dataset.lastActive);
+        element.textContent = formatLastActive(lastActive);
+    });
+
 }
 
 // Function to create a card element
@@ -243,8 +259,86 @@ function setupCreateGroupButton() {
     
     if (createGroupBtn) {
         createGroupBtn.addEventListener('click', () => {
-            console.log('Create group button clicked');
-            // Additional dropdown functionality can be added here
+            showAddClassModal();
         });
     }
 }
+
+function showAddClassModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Add New Class</h2>
+            <form id="addClassForm">
+                <input type="text" id="className" placeholder="Class Name" required>
+                <input type="text" id="facultyName" placeholder="Faculty Name" required>
+                <button type="submit">Add Class</button>
+                <button type="button" class="cancel">Cancel</button>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const form = modal.querySelector('#addClassForm');
+    form.addEventListener('submit', handleAddClass);
+
+    const cancelBtn = modal.querySelector('.cancel');
+    cancelBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+async function fetchClasses() {
+    try {
+        const response = await fetch('https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/add', { // Replace with your API Gateway endpoint
+
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('idToken')}`
+            }
+        });
+        const data = await response.json();
+        currentGroups = data; // Assuming the API returns an array of classes
+        populateGroups();
+    } catch (error) {
+        console.error('Error fetching classes:', error);
+    }
+}
+
+
+
+const handleAddClass = async (event) => {
+    event.preventDefault();
+
+    const className = document.getElementById('className').value;
+    const facultyName = document.getElementById('facultyName').value;
+
+    try {
+        const response = await fetch('https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                className,
+                facultyName
+            })
+        });
+
+        const data = await response.json(); // ✅ Properly handle the response
+        if (response.ok) {
+            console.log('Class added:', data);
+            alert(`Class added: ${data.name} by ${data.faculty}`);
+        } else {
+            console.error('Error adding class:', data.error);
+            alert(`Failed to add class: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error adding class:', error);
+        alert(`Failed to add class: ${error.message}`);
+    }
+};
+
+
+
