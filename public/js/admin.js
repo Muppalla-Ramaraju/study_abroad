@@ -318,7 +318,8 @@ const handleAddClass = async (event) => {
         const response = await fetch('https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/add', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('idToken')}`
             },
             body: JSON.stringify({
                 className,
@@ -326,10 +327,25 @@ const handleAddClass = async (event) => {
             })
         });
 
-        const data = await response.json(); // ✅ Properly handle the response
+        const data = await response.json(); //  Properly handle the response
         if (response.ok) {
             console.log('Class added:', data);
             alert(`Class added: ${data.name} by ${data.faculty}`);
+            
+            //  Add the new class to the local state
+            currentGroups.unshift({
+                id: data.classId, // Ensure the ID is set correctly
+                name: data.name,
+                faculty: data.faculty,
+                members: data.members || 0,
+                lastActive: data.lastActive
+            });
+
+            //  Refresh the UI to reflect the new class
+            populateGroups();
+
+            //  Close the modal after adding
+            document.querySelector('.modal').remove();
         } else {
             console.error('Error adding class:', data.error);
             alert(`Failed to add class: ${data.error}`);
