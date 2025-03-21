@@ -138,7 +138,8 @@ function createCard(group) {
 // Function to handle card clicks
 function handleCardClick(group) {
     console.log(`Clicked group: ${group.name}`);
-    // Additional functionality can be added here
+    // Redirect to the new class details page
+    window.location.href = `class-details.html?classId=${group.classId}`;
 }
 
 // Setup see all buttons functionality
@@ -205,7 +206,7 @@ const handleAddClass = async (event) => {
     const facultyName = document.getElementById('facultyName').value;
 
     try {
-        const response = await fetch(`${API_ENDPOINT}`, {
+        const response = await fetch(`${API_ENDPOINT}/add`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

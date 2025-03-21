@@ -10,26 +10,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
-    // If the token is about to expire within the next minute, try to refresh it first
-    /*if (Date.now() > tokenExpiresAt - 60 * 1000) {
-        console.log('Token is about to expire. Trying to refresh...');
-        try {
-            const refreshSuccess = await refreshTokens();
-            if (refreshSuccess) {
-                // Token successfully refreshed
-                console.log('Token refreshed successfully');
-            } else {
-                console.log('Failed to refresh token');
-                logout(); // Logout if refresh fails
-                return;
-            }
-        } catch (error) {
-            console.error('Error during token refresh:', error);
-            logout(); // Logout on error
-            return;
-        }
-    }*/
-
     // Initialize session checker to periodically check token expiration and refresh tokens if needed
     initSessionChecker();
 
