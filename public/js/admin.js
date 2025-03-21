@@ -1,9 +1,20 @@
 import { getSession, refreshTokens, logout, initSessionChecker } from './session.js';
 
+// Define API endpoint
+const API_ENDPOINT = 'https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes';
+
+// Time frame for active groups (in milliseconds) - 1 month
+const ACTIVE_THRESHOLD = 30 * 24 * 60 * 60 * 1000;
+
+// Global variables to store classes fetched from the API
+let allGroups = [];
+let currentGroups = [];
+let previousGroups = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Get session data
     const { idToken, userRole, tokenExpiresAt } = getSession();
-    
+
     // Check if session is expired or invalid
     if (!idToken || userRole !== 'admin') {
         logout();
@@ -11,33 +22,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // If the token is about to expire within the next minute, try to refresh it first
-    /*if (Date.now() > tokenExpiresAt - 60 * 1000) {
-        console.log('Token is about to expire. Trying to refresh...');
-        try {
-            const refreshSuccess = await refreshTokens();
-            if (refreshSuccess) {
-                // Token successfully refreshed
-                console.log('Token refreshed successfully');
-            } else {
-                console.log('Failed to refresh token');
-                logout(); // Logout if refresh fails
-                return;
-            }
-        } catch (error) {
-            console.error('Error during token refresh:', error);
-            logout(); // Logout on error
-            return;
-        }
-    }*/
-
     // Initialize session checker to periodically check token expiration and refresh tokens if needed
     initSessionChecker();
 
     lucide.createIcons();
 
-    // Populate cards for both sections
-    populateGroups();
+    // Fetch and populate classes
+    await fetchAndPopulateClasses();
 
     // Setup see all buttons
     setupSeeAllButtons();
@@ -56,162 +47,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Sample data for groups - 6 items in each array
-const currentGroups = [
-    {
-        id: 1,
-        name: 'ISTM 631 Group A',
-        members: 25,
-        faculty: 'Dr. Sarah Martinez',
-        lastActive: '2 hours ago'
-    },
-    {
-        id: 2,
-        name: 'ISTM 615 Group B',
-        members: 30,
-        faculty: 'Dr. James Wilson',
-        lastActive: '4 hours ago'
-    },
-    {
-        id: 3,
-        name: 'ISTM 645 Group C',
-        members: 28,
-        faculty: 'Dr. Emily Chen',
-        lastActive: '1 day ago'
-    },
-    {
-        id: 4,
-        name: 'ISTM 631 Group D',
-        members: 27,
-        faculty: 'Dr. Michael Brown',
-        lastActive: '3 hours ago'
-    },
-    {
-        id: 5,
-        name: 'ISTM 615 Group E',
-        members: 29,
-        faculty: 'Dr. Lisa Anderson',
-        lastActive: '5 hours ago'
-    },
-    {
-        id: 6,
-        name: 'ISTM 645 Group F',
-        members: 26,
-        faculty: 'Dr. Robert Taylor',
-        lastActive: '2 days ago'
-    }
-];
+// New function to fetch and populate classes from the API
+async function fetchAndPopulateClasses() {
+    try {
+        const response = await fetch(`${API_ENDPOINT}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('idToken')}`
+            }
+        });
 
-const previousGroups = [
-    {
-        id: 7,
-        name: 'ISTM 631 Fall 2023',
-        members: 25,
-        faculty: 'Dr. Sarah Martinez',
-        lastActive: '3 months ago'
-    },
-    {
-        id: 8,
-        name: 'ISTM 615 Fall 2023',
-        members: 30,
-        faculty: 'Dr. James Wilson',
-        lastActive: '3 months ago'
-    },
-    {
-        id: 9,
-        name: 'ISTM 645 Fall 2023',
-        members: 28,
-        faculty: 'Dr. Emily Chen',
-        lastActive: '3 months ago'
-    },
-    {
-        id: 10,
-        name: 'ISTM 631 Summer 2023',
-        members: 24,
-        faculty: 'Dr. Michael Brown',
-        lastActive: '6 months ago'
-    },
-    {
-        id: 11,
-        name: 'ISTM 615 Summer 2023',
-        members: 29,
-        faculty: 'Dr. Lisa Anderson',
-        lastActive: '6 months ago'
-    },
-    {
-        id: 12,
-        name: 'ISTM 645 Summer 2023',
-        members: 27,
-        faculty: 'Dr. Robert Taylor',
-        lastActive: '6 months ago'
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message}`);
+        }
+
+        allGroups = await response.json();
+
+        // Distinguish between current and previous classes using logic, using a field or date
+        const now = new Date();
+        currentGroups = allGroups.filter(group => new Date(group.lastActive).getTime() > (now.getTime() - ACTIVE_THRESHOLD));
+        previousGroups = allGroups.filter(group => new Date(group.lastActive).getTime() <= (now.getTime() - ACTIVE_THRESHOLD));
+
+        // Populate the groups in the UI
+        populateGroups();
+
+    } catch (error) {
+        console.error('Failed to fetch classes:', error);
+        alert(`Failed to load classes: ${error.message}`);
     }
-];
+}
 
 // Function to populate groups with initial 3 visible
 function populateGroups() {
     const currentGroupsContainer = document.querySelector('.current-groups');
     const previousGroupsContainer = document.querySelector('.previous-groups');
-    
+
     // Clear existing content
     currentGroupsContainer.innerHTML = '';
     previousGroupsContainer.innerHTML = '';
-    
+
+    // Function to append groups to a container
+    function appendGroups(groups, container) {
+        groups.forEach((group, index) => {
+            const card = createCard(group);
+
+            // Hide groups after first 3
+            if (index >= 3) {
+                card.classList.add('row-hidden');
+            }
+
+            container.appendChild(card);
+        });
+    }
+
     // Add current groups (initially first 3)
-    currentGroups.forEach((group, index) => {
-        const card = createCard(group);
-        
-        // Hide groups after first 3
-        if (index >= 3) {
-            card.classList.add('row-hidden');
-        }
-        
-        currentGroupsContainer.appendChild(card);
-    });
-    
+    appendGroups(currentGroups, currentGroupsContainer);
+
     // Add previous groups (initially first 3)
-    previousGroups.forEach((group, index) => {
-        const card = createCard(group);
-        
-        // Hide groups after first 3
-        if (index >= 3) {
-            card.classList.add('row-hidden');
-        }
-        
-        previousGroupsContainer.appendChild(card);
-    });
-    
-    // Hide "See All" buttons if there are 3 or fewer groups
-    if (currentGroups.length <= 3) {
-        document.querySelector('.see-all-btn[data-section="current"]').classList.add('hidden');
-    }
-    
-    if (previousGroups.length <= 3) {
-        document.querySelector('.see-all-btn[data-section="previous"]').classList.add('hidden');
-    }
+    appendGroups(previousGroups, previousGroupsContainer);
 
-    // Refresh "See All" button visibility
+    //  Visibility of "See All" buttons
     const currentSeeAllBtn = document.querySelector('.see-all-btn[data-section="current"]');
-    if (currentGroups.length > 3) {
-        currentSeeAllBtn.classList.remove('hidden');
-    } else {
-        currentSeeAllBtn.classList.add('hidden');
-    }
+    const previousSeeAllBtn = document.querySelector('.see-all-btn[data-section="previous"]');
 
-    // Update last active time
-    const lastActiveElements = document.querySelectorAll('.last-active');
-    lastActiveElements.forEach(element => {
-        const lastActive = new Date(element.dataset.lastActive);
-        element.textContent = formatLastActive(lastActive);
-    });
-
+    currentSeeAllBtn.classList.toggle('hidden', currentGroups.length <= 3);
+    previousSeeAllBtn.classList.toggle('hidden', previousGroups.length <= 3);
 }
 
 // Function to create a card element
 function createCard(group) {
     const card = document.createElement('div');
     card.className = 'card';
-    card.setAttribute('data-id', group.id);
-    
+    card.setAttribute('data-id', group.classId); // Changed to classId
+
     card.innerHTML = `
         <h3>${group.name}</h3>
         <div class="card-info">
@@ -220,9 +129,9 @@ function createCard(group) {
             <p>Last Active: <span>${group.lastActive}</span></p>
         </div>
     `;
-    
+
     card.addEventListener('click', () => handleCardClick(group));
-    
+
     return card;
 }
 
@@ -235,18 +144,18 @@ function handleCardClick(group) {
 // Setup see all buttons functionality
 function setupSeeAllButtons() {
     const seeAllButtons = document.querySelectorAll('.see-all-btn');
-    
+
     seeAllButtons.forEach(button => {
         button.addEventListener('click', () => {
             const section = button.getAttribute('data-section');
             const container = document.querySelector(`.${section}-groups`);
             const hiddenCards = container.querySelectorAll('.row-hidden');
-            
+
             // Show all hidden cards
             hiddenCards.forEach(card => {
                 card.classList.remove('row-hidden');
             });
-            
+
             // Hide the "See All" button after it's clicked
             button.classList.add('hidden');
         });
@@ -256,7 +165,7 @@ function setupSeeAllButtons() {
 // Setup create group button functionality
 function setupCreateGroupButton() {
     const createGroupBtn = document.querySelector('.create-group-btn');
-    
+
     if (createGroupBtn) {
         createGroupBtn.addEventListener('click', () => {
             showAddClassModal();
@@ -289,25 +198,6 @@ function showAddClassModal() {
     });
 }
 
-async function fetchClasses() {
-    try {
-        const response = await fetch('https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/add', { // Replace with your API Gateway endpoint
-
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('idToken')}`
-            }
-        });
-        const data = await response.json();
-        currentGroups = data; // Assuming the API returns an array of classes
-        populateGroups();
-    } catch (error) {
-        console.error('Error fetching classes:', error);
-    }
-}
-
-
-
 const handleAddClass = async (event) => {
     event.preventDefault();
 
@@ -315,7 +205,7 @@ const handleAddClass = async (event) => {
     const facultyName = document.getElementById('facultyName').value;
 
     try {
-        const response = await fetch('https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/add', {
+        const response = await fetch(`${API_ENDPOINT}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -327,34 +217,38 @@ const handleAddClass = async (event) => {
             })
         });
 
-        const data = await response.json(); //  Properly handle the response
-        if (response.ok) {
-            console.log('Class added:', data);
-            alert(`Class added: ${data.name} by ${data.faculty}`);
-            
-            //  Add the new class to the local state
-            currentGroups.unshift({
-                id: data.classId, // Ensure the ID is set correctly
-                name: data.name,
-                faculty: data.faculty,
-                members: data.members || 0,
-                lastActive: data.lastActive
-            });
-
-            //  Refresh the UI to reflect the new class
-            populateGroups();
-
-            //  Close the modal after adding
-            document.querySelector('.modal').remove();
-        } else {
-            console.error('Error adding class:', data.error);
-            alert(`Failed to add class: ${data.error}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message}`);
         }
+
+        const newClass = await response.json();
+
+        //  Add the new class to the local state
+        allGroups.push({
+            classId: newClass.classId, // Ensure the ID is set correctly
+            name: newClass.name,
+            faculty: newClass.faculty,
+            members: newClass.members || 0,
+            lastActive: newClass.lastActive
+        });
+
+        // Distinguish between current and previous classes using logic, using a field or date
+        const now = new Date();
+        currentGroups = allGroups.filter(group => new Date(group.lastActive).getTime() > (now.getTime() - ACTIVE_THRESHOLD));
+        previousGroups = allGroups.filter(group => new Date(group.lastActive).getTime() <= (now.getTime() - ACTIVE_THRESHOLD));
+
+        //  Refresh the UI to reflect the new class
+        populateGroups();
+
+        //  Close the modal after adding
+        document.querySelector('.modal').remove();
     } catch (error) {
         console.error('Error adding class:', error);
         alert(`Failed to add class: ${error.message}`);
     }
 };
+
 
 
 
