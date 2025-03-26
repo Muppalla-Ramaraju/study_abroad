@@ -10,68 +10,66 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
-    // If the token is about to expire within the next minute, try to refresh it first
-    /*if (Date.now() > tokenExpiresAt - 60 * 1000) {
-        console.log('Token is about to expire. Trying to refresh...');
-        try {
-            const refreshSuccess = await refreshTokens();
-            if (refreshSuccess) {
-                // Token successfully refreshed
-                console.log('Token refreshed successfully');
-
-            } else {
-                console.log('Failed to refresh token');
-                logout(); // Logout if refresh fails
-                return;
-            }
-        } catch (error) {
-            console.error('Error during token refresh:', error);
-            logout(); // Logout on error
-            return;
-        }
-    }*/
-
-    // Initialize session checker to periodically check token expiration and refresh tokens if needed
+    // Initialize session checker
     initSessionChecker();
 
-    // Get Location Button
+    // DOM Elements
     const getLocationBtn = document.getElementById('getLocation');
     const coordinatesDisplay = document.getElementById('coordinates');
-
-    // Additional Details Elements
     const editDetailsBtn = document.getElementById('editDetails');
     const viewMode = document.getElementById('viewMode');
     const editMode = document.getElementById('editMode');
     const saveDetailsBtn = document.getElementById('saveDetails');
     const cancelEditBtn = document.getElementById('cancelEdit');
+    const mapsLink = document.querySelector('.maps-link');
+    const navButtons = document.querySelectorAll('.nav-menu button');
+    const logoutBtn = document.querySelector('.logout-btn');
+    const textarea = document.getElementById('commentsInput');
 
-    // Get Current Location
-    getLocationBtn.addEventListener('click', function() {
+    // API Configuration
+    const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
+
+    // Get Current Location with API Integration
+    getLocationBtn.addEventListener('click', async function() {
         this.disabled = true;
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
         
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const coords = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
-                    coordinatesDisplay.textContent = coords;
-                    getLocationBtn.disabled = false;
-                    getLocationBtn.innerHTML = 'Get Current Location';
-                },
-                function(error) {
-                    console.error("Error getting location:", error);
-                    alert("Unable to retrieve your location. Please check your settings and try again.");
-                    getLocationBtn.disabled = false;
-                    getLocationBtn.innerHTML = 'Get Current Location';
-                },
-                {
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
                     enableHighAccuracy: true,
                     timeout: 5000,
                     maximumAge: 0
-                }
-            );
-        } else {
-            alert("Geolocation is not supported by your browser.");
+                });
+            });
+
+            const coords = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
+            coordinatesDisplay.textContent = coords;
+
+            // Send to API
+            const response = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    id: idToken, // Using idToken as unique identifier
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('API request failed');
+            }
+
+            console.log('Location stored successfully');
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert(error.message || "Unable to process location");
+        } finally {
             getLocationBtn.disabled = false;
             getLocationBtn.innerHTML = 'Get Current Location';
         }
@@ -125,15 +123,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Google Maps Link
-    const mapsLink = document.querySelector('.maps-link');
     mapsLink.addEventListener('click', function(e) {
         e.preventDefault();
         const coordinates = coordinatesDisplay.textContent;
-        window.open(`https://www.google.com/maps?q=${coordinates}`, '_blank');
+        if (coordinates) {
+            window.open(`https://www.google.com/maps?q=${coordinates}`, '_blank');
+        }
     });
 
-    // Add active state to navigation buttons
-    const navButtons = document.querySelectorAll('.nav-menu button');
+    // Navigation Buttons
     navButtons.forEach(button => {
         button.addEventListener('click', function() {
             navButtons.forEach(btn => btn.classList.remove('active'));
@@ -141,22 +139,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    // Logout button functionality
-    const logoutBtn = document.querySelector('.logout-btn');
+    // Logout Button
     logoutBtn.addEventListener('click', function() {
         if (confirm('Are you sure you want to log out?')) {
-            logout(); // Logout action
+            logout();
         }
     });
 
-    // Auto-resize textarea
-    const textarea = document.getElementById('commentsInput');
+    // Textarea Auto-resize
     if (textarea) {
         textarea.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
+            this.style.height = `${this.scrollHeight}px`;
         });
-
-
     }
 });

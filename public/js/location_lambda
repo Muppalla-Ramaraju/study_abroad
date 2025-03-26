@@ -1,0 +1,44 @@
+// index.mjs
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
+
+const dynamodbClient = new DynamoDBClient({ region: 'us-east-1' });
+
+export const handler = async (event) => {
+    try {
+        const { id, latitude, longitude } = event; // Directly access event attributes
+
+        if (!id || !latitude || !longitude) {
+            console.error('Missing required attributes');
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: 'Missing required attributes' }),
+            };
+        }
+
+        const timestamp = Date.now();
+
+        const params = {
+            TableName: 'Locations',
+            Item: {
+                id: { S: id },
+                latitude: { N: String(latitude) },
+                longitude: { N: String(longitude) },
+                timestamp: { N: String(timestamp) }
+            }
+        };
+
+        const command = new PutItemCommand(params);
+        await dynamodbClient.send(command);
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Location stored successfully' }),
+        };
+    } catch (error) {
+        console.error('Error storing location:', error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'Failed to store location' }),
+        };
+    }
+};
