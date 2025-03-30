@@ -1,6 +1,6 @@
 import { getSession, refreshTokens, logout, initSessionChecker } from './session.js';
 
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     // Get session data
     const { idToken, userRole, tokenExpiresAt } = getSession();
 
@@ -30,10 +30,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
 
     // Get Current Location with API Integration
-    getLocationBtn.addEventListener('click', async function() {
+    getLocationBtn.addEventListener('click', async function () {
         this.disabled = true;
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
-        
+
         try {
             const position = await new Promise((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
-                    id: idToken, // Using idToken as unique identifier
+                    id: idToken,  // Using idToken as unique identifier
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude
                 })
@@ -64,7 +64,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                 throw new Error('API request failed');
             }
 
-            console.log('Location stored successfully');
+            const responseData = await response.json();
+            console.log('Location stored successfully:', responseData);
+
+            // Display Google Maps Link
+            const mapsLinkUrl = responseData.mapsLink;
+            if (mapsLinkUrl) {
+                mapsLink.textContent = 'View on Google Maps';
+                mapsLink.href = mapsLinkUrl;
+            }
 
         } catch (error) {
             console.error("Error:", error);
@@ -76,17 +84,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Additional Details Edit Mode Toggle
-    editDetailsBtn.addEventListener('click', function() {
+    editDetailsBtn.addEventListener('click', function () {
         viewMode.classList.add('hidden');
         editMode.classList.remove('hidden');
-        
+
         document.getElementById('withWhomInput').value = document.getElementById('withWhomText').textContent;
         document.getElementById('currentPlaceInput').value = document.getElementById('currentPlaceText').textContent;
         document.getElementById('commentsInput').value = document.getElementById('commentsText').textContent;
     });
 
     // Save Details
-    saveDetailsBtn.addEventListener('click', function() {
+    saveDetailsBtn.addEventListener('click', function () {
         document.getElementById('withWhomText').textContent = document.getElementById('withWhomInput').value;
         document.getElementById('currentPlaceText').textContent = document.getElementById('currentPlaceInput').value;
         document.getElementById('commentsText').textContent = document.getElementById('commentsInput').value;
@@ -96,14 +104,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Cancel Edit
-    cancelEditBtn.addEventListener('click', function() {
+    cancelEditBtn.addEventListener('click', function () {
         viewMode.classList.remove('hidden');
         editMode.classList.add('hidden');
     });
 
     // Copy Functionality
     document.querySelectorAll('.copy-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const textToCopy = this.previousElementSibling?.textContent || '';
             if (textToCopy) {
                 navigator.clipboard.writeText(textToCopy)
@@ -123,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Google Maps Link
-    mapsLink.addEventListener('click', function(e) {
+    mapsLink.addEventListener('click', function (e) {
         e.preventDefault();
         const coordinates = coordinatesDisplay.textContent;
         if (coordinates) {
@@ -133,14 +141,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Navigation Buttons
     navButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             navButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
         });
     });
 
     // Logout Button
-    logoutBtn.addEventListener('click', function() {
+    logoutBtn.addEventListener('click', function () {
         if (confirm('Are you sure you want to log out?')) {
             logout();
         }
@@ -148,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Textarea Auto-resize
     if (textarea) {
-        textarea.addEventListener('input', function() {
+        textarea.addEventListener('input', function () {
             this.style.height = 'auto';
             this.style.height = `${this.scrollHeight}px`;
         });
