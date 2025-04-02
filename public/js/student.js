@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Check if session is expired or invalid
     if (!idToken || userRole !== 'student') {
-        logout();  // No token or invalid role, log out immediately
+        logout(); // No token or invalid role, log out immediately
         return;
     }
 
@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // DOM Elements
     const getLocationBtn = document.getElementById('getLocation');
     const coordinatesDisplay = document.getElementById('coordinates');
+    const addressDisplay = document.getElementById('addressDisplay'); // Added for address display
     const editDetailsBtn = document.getElementById('editDetails');
     const viewMode = document.getElementById('viewMode');
     const editMode = document.getElementById('editMode');
@@ -28,6 +29,25 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // API Configuration
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
+    const GEOAPIFY_API_KEY = 'f6a76cacf081475897b4d70fd23f3d62'; // Your Geoapify API key
+
+    // Function to get address from coordinates using Geoapify Reverse Geocoding API
+    async function getAddressFromCoordinates(lat, lon) {
+        const reverseGeocodingUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${GEOAPIFY_API_KEY}`;
+        try {
+            const response = await fetch(reverseGeocodingUrl);
+            if (!response.ok) throw new Error('Failed to fetch address');
+            const data = await response.json();
+            if (data.features && data.features.length > 0) {
+                return data.features[0].properties.formatted; // Full formatted address
+            } else {
+                throw new Error('No address found');
+            }
+        } catch (error) {
+            console.error('Error fetching address:', error);
+            return 'Address not found';
+        }
+    }
 
     // Get Current Location with API Integration
     getLocationBtn.addEventListener('click', async function () {
@@ -43,10 +63,18 @@ document.addEventListener('DOMContentLoaded', async function () {
                 });
             });
 
-            const coords = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
+            const latitude = position.coords.latitude.toFixed(6);
+            const longitude = position.coords.longitude.toFixed(6);
+            const coords = `${latitude},${longitude}`;
             coordinatesDisplay.textContent = coords;
 
-            // Send to API
+            // Reverse geocode to get the address
+            const address = await getAddressFromCoordinates(latitude, longitude);
+            
+            // Display the address
+            addressDisplay.textContent = address;
+
+            // Send location and address to your API
             const response = await fetch(API_ENDPOINT, {
                 method: 'POST',
                 headers: {
@@ -54,20 +82,19 @@ document.addEventListener('DOMContentLoaded', async function () {
                     'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
-                    id: idToken,  // Using idToken as unique identifier
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude
+                    id: idToken,
+                    latitude: latitude,
+                    longitude: longitude,
+                    address: address // Include the address in the payload
                 })
             });
 
-            if (!response.ok) {
-                throw new Error('API request failed');
-            }
-
+            if (!response.ok) throw new Error('API request failed');
+            
             const responseData = await response.json();
-            console.log('Location stored successfully:', responseData);
+            console.log('Location and address stored successfully:', responseData);
 
-            // Display Google Maps Link
+            // Display Google Maps link
             const mapsLinkUrl = responseData.mapsLink;
             if (mapsLinkUrl) {
                 mapsLink.textContent = 'View on Google Maps';
