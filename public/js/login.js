@@ -36,11 +36,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const data = await response.json();
             console.log('Login response:', data); // Debug response
-
             if (data.success) {
                 // Store tokens in session using session.js
                 setSession(data);
                 localStorage.setItem('email', email); // Store email for later use
+                localStorage.setItem('name', data.name); // Store remember choice
                 loginStatus.innerText = 'Successfully Logged In';
                 loginStatus.style.color = 'green';
 

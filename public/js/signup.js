@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const result = await response.json();
             console.log('Sign-up successful:', result);
             alert(`Sign-up successful! Welcome, ${result.username}. Please check your email for verification.`);
+            
             // Redirect to verify page with the username as a URL parameter and auto-fill the role
             // Redirect to verify page with username and role
             window.location.href = `verify.html?username=${encodeURIComponent(result.username)}&role=${encodeURIComponent(roleInput.value)}`;

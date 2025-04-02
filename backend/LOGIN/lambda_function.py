@@ -99,3 +99,4 @@ def lambda_handler(event, context):
     except Exception as e:
         print(f"Error processing request: {str(e)}")
         return {"statusCode": 500, "headers": cors_headers, "body": json.dumps({"success": False, "message": "Internal server error"})}
+    

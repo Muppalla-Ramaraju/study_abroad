@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
     const GEOAPIFY_API_KEY = 'f6a76cacf081475897b4d70fd23f3d62'; // Your Geoapify API key
 
+    // Get user name from local storage
+    const userName = localStorage.getItem('name');
+
     // Function to get address from coordinates using Geoapify Reverse Geocoding API
     async function getAddressFromCoordinates(lat, lon) {
         const reverseGeocodingUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${GEOAPIFY_API_KEY}`;
@@ -70,27 +73,31 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             // Reverse geocode to get the address
             const address = await getAddressFromCoordinates(latitude, longitude);
-            
+
             // Display the address
             addressDisplay.textContent = address;
 
-            // Send location and address to your API
+            // Send location, address, and name to your API
+            const payload = {
+                id: idToken,
+                latitude: latitude,
+                longitude: longitude,
+                address: address,
+                name: userName // Include the name in the payload
+            };
+            console.log('Payload being sent to API:', payload);  // Debugging
+
             const response = await fetch(API_ENDPOINT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`
                 },
-                body: JSON.stringify({
-                    id: idToken,
-                    latitude: latitude,
-                    longitude: longitude,
-                    address: address // Include the address in the payload
-                })
+                body: JSON.stringify(payload)
             });
 
             if (!response.ok) throw new Error('API request failed');
-            
+
             const responseData = await response.json();
             console.log('Location and address stored successfully:', responseData);
 
