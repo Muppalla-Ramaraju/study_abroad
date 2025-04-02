@@ -312,36 +312,19 @@ td a:hover {
 
 .modal-content {
     background-color: white;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 0.5rem;
     width: 90%;
-    max-width: 500px;
+    max-width: 1200px; /* Doubled from 600px to 1200px */
 }
 
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .modal-content h2 {
     color: var(--gray-700);
-    font-size: 1.5rem;
-}
-
-.new-btn {
-    background-color: var(--tamu-maroon);
-    color: var(--white);
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.new-btn:hover {
-    background-color: var(--tamu-maroon-dark);
+    font-size: 1.25rem;
 }
 
 .modal-content form {
@@ -356,63 +339,15 @@ td a:hover {
     gap: 0.5rem;
 }
 
-.form-group label {
-    color: var(--gray-600);
-    font-size: 0.9rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.mandatory-toggle {
-    cursor: pointer;
-    color: var(--gray-500);
-}
-
-.mandatory-toggle.mandatory {
-    color: var(--tamu-maroon);
-}
-
-.location-group {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.get-location-btn {
-    background-color: var(--tamu-maroon);
-    color: white;
-    padding: 0.5rem;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-}
-
-.get-location-btn:hover {
-    background-color: var(--tamu-maroon-dark);
-}
-
-.modal-content input,
-.modal-content textarea,
-.modal-content select {
+.modal-content textarea {
     padding: 0.75rem;
     border: 1px solid var(--gray-300);
     border-radius: 0.25rem;
     font-size: 1rem;
-}
-
-.modal-content input[readonly] {
-    background-color: var(--gray-100);
-    cursor: not-allowed;
-}
-
-.modal-content textarea {
-    min-height: 100px;
+    min-height: 400px; /* Doubled from 200px to 400px */
     resize: vertical;
 }
 
-.modal-content input::placeholder,
 .modal-content textarea::placeholder {
     color: var(--gray-500);
 }
@@ -440,43 +375,4 @@ td a:hover {
 .modal-buttons button.cancel {
     background-color: var(--gray-300);
     color: var(--gray-700);
-}
-
-.add-field-btn {
-    background-color: var(--tamu-maroon);
-    color: var(--white);
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    margin-top: 1rem;
-}
-
-.add-field-btn:hover {
-    background-color: var(--tamu-maroon-dark);
-}
-
-.field-type-group {
-    margin-top: 1rem;
-    border: 1px solid var(--gray-300);
-    padding: 1rem;
-    border-radius: 0.25rem;
-}
-
-.custom-field-group {
-    margin-top: 1rem;
-    border: 1px solid var(--gray-300);
-    padding: 1rem;
-    border-radius: 0.25rem;
-}
-
-.custom-field-group label input {
-    border: none;
-    outline: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--gray-600);
-    background: transparent;
-    width: auto;
 }

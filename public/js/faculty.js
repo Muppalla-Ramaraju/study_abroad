@@ -75,45 +75,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Check-In (Default)</h2>
-                    <button class="new-btn">New</button>
+                    <h2>Please Enter Your Message</h2>
                 </div>
-                <form id="checkinForm">
+                <form id="messageForm">
                     <div class="form-group">
-                        <label for="studentName">
-                            Student Name
-                            <i class="fas fa-star mandatory-toggle" data-field="studentName"></i>
-                        </label>
-                        <input type="text" id="studentName" placeholder="Enter the student name">
-                    </div>
-                    <div class="form-group">
-                        <label for="location">
-                            Location
-                            <i class="fas fa-star mandatory-toggle" data-field="location"></i>
-                        </label>
-                        <div class="location-group">
-                            <input type="text" id="location" readonly>
-                            <button type="button" class="get-location-btn">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="companionName">
-                            Companion Name/s
-                            <i class="fas fa-star mandatory-toggle" data-field="companionName"></i>
-                        </label>
-                        <input type="text" id="companionName" placeholder="Enter your companion">
-                    </div>
-                    <div class="form-group">
-                        <label for="comments">
-                            Comments
-                            <i class="fas fa-star mandatory-toggle" data-field="comments"></i>
-                        </label>
-                        <textarea id="comments" placeholder="Do you have any comments?"></textarea>
+                        <textarea id="announcement" name="announcement" placeholder="Enter your announcement for students" maxlength="1000"></textarea>
                     </div>
                     <div class="modal-buttons">
-                        <button type="submit">Create</button>
+                        <button type="submit">Post</button>
                         <button type="button" class="cancel">Cancel</button>
                     </div>
                 </form>
@@ -122,18 +91,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         document.body.appendChild(modal);
         
-        const form = modal.querySelector('form');
+        const form = modal.querySelector('#messageForm');
+        const textarea = modal.querySelector('#announcement');
+
+        // Ensure Enter key creates a new line and does not submit
+        form.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target === textarea && !e.shiftKey) {
+                e.stopPropagation(); // Prevent any parent handlers
+                // No need to preventDefault; textarea naturally handles Enter for new lines
+            }
+        });
+
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const mandatoryFields = Array.from(modal.querySelectorAll('.mandatory-toggle.mandatory'))
-                .map(toggle => toggle.getAttribute('data-field'));
-            
             const formData = new FormData(this);
-            const submissionData = {
-                data: Object.fromEntries(formData),
-                mandatoryFields: mandatoryFields
-            };
-            console.log('Check-in submitted:', submissionData);
+            const announcement = formData.get('announcement');
+            console.log('Announcement posted:', announcement);
             document.body.removeChild(modal);
         });
         
@@ -142,200 +115,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             document.body.removeChild(modal);
         });
 
-        const getLocationBtn = modal.querySelector('.get-location-btn');
-        const locationInput = modal.querySelector('#location');
-        getLocationBtn.addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        locationInput.value = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° W`;
-                    },
-                    (error) => {
-                        alert('Unable to retrieve location. Please enable location services.');
-                        console.error('Geolocation error:', error);
-                    }
-                );
-            } else {
-                alert('Geolocation is not supported by your browser.');
-            }
-        });
-
-        const newBtn = modal.querySelector('.new-btn');
-        newBtn.addEventListener('click', function() {
-            showNewPresetModal();
-        });
-
-        const mandatoryToggles = modal.querySelectorAll('.mandatory-toggle');
-        mandatoryToggles.forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                this.classList.toggle('mandatory');
-                const fieldId = this.getAttribute('data-field');
-                const field = modal.querySelector(`#${fieldId}`);
-                if (this.classList.contains('mandatory')) {
-                    field.setAttribute('data-mandatory', 'true');
-                } else {
-                    field.removeAttribute('data-mandatory');
-                }
-            });
-        });
-    }
-
-    function showNewPresetModal() {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        
-        modal.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Create a New Preset</h2>
-                </div>
-                <form id="presetForm">
-                    <div class="form-group">
-                        <label for="presetName">Preset Name</label>
-                        <input type="text" id="presetName" placeholder="Enter preset name">
-                    </div>
-                    <div id="dynamicFields"></div>
-                    <button type="button" class="add-field-btn">Add Field</button>
-                    <div class="modal-buttons">
-                        <button type="submit">Create</button>
-                        <button type="button" class="cancel">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        const form = modal.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const presetData = {
-                presetName: formData.get('presetName'),
-                fields: []
-            };
-            
-            const fieldGroups = modal.querySelectorAll('.custom-field-group');
-            fieldGroups.forEach(group => {
-                const label = group.querySelector('label input').value;
-                const fieldType = group.getAttribute('data-field-type');
-                const isMandatory = group.querySelector('.mandatory-toggle').classList.contains('mandatory');
-                presetData.fields.push({
-                    label: label,
-                    type: fieldType,
-                    mandatory: isMandatory
-                });
-            });
-            
-            console.log('Preset created:', presetData);
-            document.body.removeChild(modal);
-        });
-        
-        const cancelBtn = modal.querySelector('.cancel');
-        cancelBtn.addEventListener('click', function() {
-            document.body.removeChild(modal);
-        });
-
-        const addFieldBtn = modal.querySelector('.add-field-btn');
-        const dynamicFields = modal.querySelector('#dynamicFields');
-        let fieldCounter = 0;
-
-        addFieldBtn.addEventListener('click', function() {
-            const fieldTypeGroup = document.createElement('div');
-            fieldTypeGroup.className = 'field-type-group';
-            fieldTypeGroup.innerHTML = `
-                <label for="fieldType${fieldCounter}">Type of Field</label>
-                <select id="fieldType${fieldCounter}">
-                    <option value="">Select a field type</option>
-                    <option value="text">Text</option>
-                    <option value="location">Location</option>
-                    <option value="comments">Comments</option>
-                </select>
-            `;
-            dynamicFields.appendChild(fieldTypeGroup);
-
-            const fieldTypeSelect = fieldTypeGroup.querySelector('select');
-            fieldTypeSelect.addEventListener('change', function() {
-                const fieldType = this.value;
-                if (fieldType) {
-                    fieldTypeGroup.remove(); // Remove the dropdown after selection
-                    addCustomField(dynamicFields, fieldType, fieldCounter);
-                    fieldCounter++;
-                }
-            });
-        });
-    }
-
-    function addCustomField(container, fieldType, fieldId) {
-        const fieldGroup = document.createElement('div');
-        fieldGroup.className = 'custom-field-group';
-        fieldGroup.setAttribute('data-field-type', fieldType);
-
-        let fieldHTML = '';
-        if (fieldType === 'text') {
-            fieldHTML = `
-                <input type="text" id="field${fieldId}" name="field${fieldId}" placeholder="Enter text">
-            `;
-        } else if (fieldType === 'location') {
-            fieldHTML = `
-                <div class="location-group">
-                    <input type="text" id="field${fieldId}" name="field${fieldId}" readonly placeholder="Pick a location">
-                    <button type="button" class="get-location-btn">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </button>
-                </div>
-            `;
-        } else if (fieldType === 'comments') {
-            fieldHTML = `
-                <textarea id="field${fieldId}" name="field${fieldId}" placeholder="Enter your comments"></textarea>
-            `;
-        }
-
-        fieldGroup.innerHTML = `
-            <label>
-                <input type="text" value="New Field" class="field-label">
-                <i class="fas fa-star mandatory-toggle" data-field="field${fieldId}"></i>
-            </label>
-            ${fieldHTML}
-        `;
-
-        container.appendChild(fieldGroup);
-
-        // Add mandatory toggle functionality
-        const mandatoryToggle = fieldGroup.querySelector('.mandatory-toggle');
-        mandatoryToggle.addEventListener('click', function() {
-            this.classList.toggle('mandatory');
-            const fieldId = this.getAttribute('data-field');
-            const field = fieldGroup.querySelector(`#${fieldId}`);
-            if (this.classList.contains('mandatory')) {
-                field.setAttribute('data-mandatory', 'true');
-            } else {
-                field.removeAttribute('data-mandatory');
-            }
-        });
-
-        // Add location picker functionality if the field is a location
-        if (fieldType === 'location') {
-            const getLocationBtn = fieldGroup.querySelector('.get-location-btn');
-            const locationInput = fieldGroup.querySelector(`#field${fieldId}`);
-            getLocationBtn.addEventListener('click', function() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const { latitude, longitude } = position.coords;
-                            locationInput.value = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° W`;
-                        },
-                        (error) => {
-                            alert('Unable to retrieve location. Please enable location services.');
-                            console.error('Geolocation error:', error);
-                        }
-                    );
-                } else {
-                    alert('Geolocation is not supported by your browser.');
-                }
-            });
-        }
+        // Focus the textarea immediately
+        textarea.focus();
     }
 
     // Logout Button
