@@ -1,5 +1,5 @@
 // Time frame for active groups (in milliseconds) - 1 month
-export const ACTIVE_THRESHOLD = 30 * 24 * 60 * 60 * 1000;
+/*export const ACTIVE_THRESHOLD = 30 * 24 * 60 * 60 * 1000;
 
 // Function to populate groups with initial 3 visible
 export function populateGroups(currentGroups, previousGroups, handleCardClick) {
@@ -89,3 +89,4 @@ export function setupCreateGroupButton(showAddClassModal) {
         });
     }
 }
+*/

@@ -1,8 +1,6 @@
 import { getSession, refreshTokens, logout, initSessionChecker } from './session.js';
 
-
 document.addEventListener('DOMContentLoaded', async () => {
-
     const { idToken, userRole, tokenExpiresAt } = getSession();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -13,189 +11,365 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'admin.html'; // Redirect to admin page
         return;
     }
+    
     initSessionChecker();
 
-    // Fetch class details by class ID
-    const classDetails = await fetchClassDetails(classId);
+    // Populate student dropdown
+    await populateStudentDropdown();
 
-    if (!classDetails) {
-        alert('Failed to load class details.');
-        window.location.href = 'admin.html';
-        return;
-    }
+    // Populate current students list
+    await populateCurrentStudentsList(classId);
 
-    // Populate class details
-    document.querySelector('.class-details h2').textContent = classDetails.name;
-    document.getElementById('members-count').textContent = classDetails.members;
-    document.getElementById('faculty-name').textContent = classDetails.faculty;
-    document.getElementById('last-active').textContent = classDetails.lastActive;
-
-    // All student information
-    await populateStudentDropDown();
-
-    // Populate student list and faculty list
-    populateStudentList(classDetails.students);
-    populateFacultyList(classDetails.faculty);
-
-    // Handle adding students
-    document.getElementById('addStudentForm').addEventListener('submit', async (event) => {
+    // Handle Add Student Button
+    document.getElementById("addStudentForm").addEventListener("submit", async (event) => {
         event.preventDefault();
-        const studentEmail = document.getElementById('studentEmail').value;
-        await addStudentToClass(classId, studentEmail);
+        await addStudentToClass(classId);
     });
 
-    // Handle adding faculty
-    document.getElementById('addFacultyForm').addEventListener('submit', async (event) => {
+    // Populate faculty dropdown
+    await populateFacultyDropdown();
+
+    // Populate current faculty list
+    await populateCurrentFacultyList(classId);
+
+    // Handle Add Faculty Button
+    document.getElementById("addFacultyForm").addEventListener("submit", async (event) => {
         event.preventDefault();
-        const facultyEmail = document.getElementById('facultyEmail').value;
-        await addFacultyToClass(classId, facultyEmail);
+        await addFacultyToClass(classId);
     });
 });
 
-// Function to fetch for class information
-/*async function fetchClassDetails(classId) {
+// Populate student dropdown
+async function populateStudentDropdown() {
+    const studentDropdown = document.getElementById("studentEmail");
+    const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students";
+
     try {
-        // This needs to be an endpoint so the system can use class id.
-        const response = await fetch(`https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/${classId}`, {
-            method: 'GET',
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error("Failed to fetch student data");
+        }
+        const students = await response.json();
+
+        studentDropdown.innerHTML = ""; // Clear existing options
+        students.forEach(student => {
+            const option = document.createElement("option");
+            option.value = student.name;
+            option.textContent = student.name;
+            studentDropdown.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error loading students:", error);
+    }
+}
+
+// Populate current students list
+async function populateCurrentStudentsList(classId) {
+    const studentList = document.getElementById("student-list");
+    const apiUrl = `https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students/list`;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('idToken')}`
-            }
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ classId }) // Send classId in the request body
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to fetch student data");
+        }
+        
+        const data = await response.json();
+        const students = data.studentsList || [];
+        
+        // Update student count in the UI
+        document.getElementById("members-count").textContent = students.length;
+        
+        // Clear and populate the student list
+        studentList.innerHTML = ''; 
+        
+        students.forEach(student => {
+            const li = document.createElement("li");
+            li.className = "student-item";
+            
+            // Create a container for student name
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = student;
+            nameSpan.className = "student-name";
+            li.appendChild(nameSpan);
+            
+            // Create remove button
+            const removeBtn = document.createElement("button");
+            removeBtn.textContent = "Remove";
+            removeBtn.className = "remove-btn";
+            removeBtn.addEventListener("click", () => removeStudentFromClass(classId, student));
+            li.appendChild(removeBtn);
+            
+            studentList.appendChild(li);
+        });
+    } catch (error) {
+        console.error("Error fetching students list:", error);
+        studentList.innerHTML = '<li>Failed to load students</li>';
+    }
+}
+
+// Add student to class
+async function addStudentToClass(classId) {
+    const studentDropdown = document.getElementById("studentEmail");
+    const selectedStudent = studentDropdown.value;
+
+    if (!selectedStudent) {
+        alert("Please select a student.");
+        return;
+    }
+
+    const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students/add";
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                student: selectedStudent,
+                classId: classId  // Sending classId in the request body
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error("Failed to add student to class.");
         }
 
-        return await response.json();
+        alert("Student added successfully!");
+        
+        // Refresh student list
+        await populateCurrentStudentsList(classId);
+
     } catch (error) {
-        console.error('Failed to fetch class details:', error);
-        return null;
+        console.error("Error adding student:", error);
+    }
+}
+
+// Remove student from class
+async function removeStudentFromClass(classId, studentName) {
+    if (!confirm(`Are you sure you want to remove ${studentName} from this class?`)) {
+        return;
+    }
+    
+    const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students/remove";
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                student: studentName,
+                classId: classId
+            })
+        });
+
+        // Refresh student list
+        await populateCurrentStudentsList(classId);
+        
+        alert("Student removed successfully!");
+
+    } catch (error) {
+        console.error("Error removing student:", error);
+        alert("Failed to remove student. Please try again or contact support.");
+    }
+}
+
+// Populate faculty dropdown
+async function populateFacultyDropdown() {
+    const facultyDropdown = document.getElementById("facultyEmail");
+    const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/faculty";
+
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error("Failed to fetch faculty data");
+        }
+        const faculty = await response.json();
+
+        facultyDropdown.innerHTML = ""; // Clear existing options
+        faculty.forEach(facultyMember => {
+            const option = document.createElement("option");
+            option.value = facultyMember.name;
+            option.textContent = facultyMember.name;
+            facultyDropdown.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error loading faculty:", error);
+    }
+}
+
+// Populate current faculty list for a class
+/*async function populateCurrentFacultyList(classId) {
+    const membersCount = document.getElementById("members-count"); // Get members count element
+
+    // Check if the members-count element exists
+    if (!membersCount) {
+        console.error("members-count element not found in the DOM");
+        return;
+    }
+
+    const apiUrl = `https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/faculty/list`;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ classId }) // Send classId in the request body
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to fetch faculty data");
+        }
+        
+        const data = await response.json();
+        const facultyMembers = data.facultyList || [];
+        
+        // Increment the members count by 1 for each faculty member
+        membersCount.textContent = parseInt(membersCount.textContent, 10) + facultyMembers.length; 
+        
+    } catch (error) {
+        console.error("Error fetching faculty list:", error);
+        membersCount.textContent = 'Failed to load member count';
     }
 }*/
 
-// This needs an endpoint to pull data.
-async function populateStudentDropDown() {
-    const studentDropDown = document.getElementById('studentEmail');
-    console.log(studentDropDown)
-    try {
-        const response = await fetch(`https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('idToken')}`
-            }
-        });
+async function populateCurrentFacultyList(classId) {
+    const facultyList = document.getElementById("faculty-list");
+    const membersCount = document.getElementById("members-count"); // Get members count element
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const students = await response.json();
-        
-        // Clear existing options first (good practice)
-        studentDropDown.innerHTML = '';
-        
-        // Add a default "Select student" option
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = '-- Select a student --';
-        defaultOption.selected = true;
-        defaultOption.disabled = true;
-        studentDropDown.appendChild(defaultOption);
-        
-        // Sort students alphabetically by firstName then lastName (optional)
-        students.sort((a, b) => {
-            if (a.firstName < b.firstName) return -1;
-            if (a.firstName > b.firstName) return 1;
-            return a.lastName.localeCompare(b.lastName);
-        });
-        
-        // Add each student to the dropdown
-        students.forEach(student => {
-            const option = document.createElement('option');
-            option.value = student.email;
-            option.textContent = `${student.firstName} ${student.lastName}`;
-            studentDropDown.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Failed to fetch student list:', error);
-        // Show an error message to the user
-        studentDropDown.innerHTML = '<option value="">Error loading students</option>';
+    // Check if the faculty-list or members-count element exists
+    if (!facultyList || !membersCount) {
+        console.error("faculty-list or members-count element not found in the DOM");
+        return;
     }
-}
 
-// This handles the functionality for adding the student to the class.
-async function addStudentToClass(classId, studentEmail) {
+    const apiUrl = `https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/faculty/list`;
+
     try {
-        const response = await fetch(`https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/${classId}/students`, {
-            method: 'POST',
+        const response = await fetch(apiUrl, {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('idToken')}`
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ studentEmail })
+            body: JSON.stringify({ classId }) // Send classId in the request body
         });
-
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error("Failed to fetch faculty data");
         }
-
-        const result = await response.json();
-        populateStudentList(result.updated_students);
-
-        alert('Student added successfully.');
+        
+        const data = await response.json();
+        const facultyMembers = data.facultyList || [];
+        
+        // Increment members count by 1 each time data is fetched
+        membersCount.textContent = parseInt(membersCount.textContent, 10) + 1; 
+        
+        // Clear and populate the faculty list
+        facultyList.innerHTML = ''; 
+        
+        facultyMembers.forEach(faculty => {
+            const li = document.createElement("li");
+            li.className = "faculty-item";
+            
+            // Create a container for faculty name
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = faculty;
+            nameSpan.className = "faculty-name";
+            li.appendChild(nameSpan);
+            
+            // Create remove button
+            const removeBtn = document.createElement("button");
+            removeBtn.textContent = "Remove";
+            removeBtn.className = "remove-btn";
+            removeBtn.addEventListener("click", () => removeFacultyFromClass(classId, faculty));
+            li.appendChild(removeBtn);
+            
+            facultyList.appendChild(li);
+        });
     } catch (error) {
-        console.error('Failed to add student to class:', error);
-        alert('Failed to add student to class.');
+        console.error("Error fetching faculty list:", error);
+        facultyList.innerHTML = '<li>Failed to load faculty members</li>';
     }
 }
 
-// This function adds the faculty to the class, also with error handling.
-async function addFacultyToClass(classId, facultyEmail) {
+
+// Add faculty to class
+async function addFacultyToClass(classId) {
+    const facultyDropdown = document.getElementById("facultyEmail");
+    const selectedFaculty = facultyDropdown.value;
+
+    if (!selectedFaculty) {
+        alert("Please select a faculty member.");
+        return;
+    }
+
+    const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/faculty/add";
+
     try {
-        const response = await fetch(`https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/${classId}/faculty`, {
-            method: 'POST',
+        const response = await fetch(apiUrl, {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('idToken')}`
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ facultyEmail })
+            body: JSON.stringify({
+                faculty: selectedFaculty,
+                classId: classId  // Sending classId in the request body
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error("Failed to add faculty to class.");
         }
 
-        const result = await response.json();
-        populateFacultyList(result.updated_faculty);
-        alert('Faculty added successfully.');
+        alert("Faculty added successfully!");
+        
+        // Refresh faculty list
+        await populateCurrentFacultyList(classId);
 
     } catch (error) {
-        console.error('Failed to add faculty to class:', error);
-        alert('Failed to add faculty to class.');
+        console.error("Error adding faculty:", error);
     }
 }
 
-// Populates students to a list.
-function populateStudentList(students) {
-    const studentList = document.getElementById('student-list');
-    studentList.innerHTML = ''; // Clear existing list
+// Remove faculty from class
+async function removeFacultyFromClass(classId, facultyName) {
+    if (!confirm(`Are you sure you want to remove ${facultyName} from this class?`)) {
+        return;
+    }
+    
+    const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/faculty/remove";
 
-    students.forEach(student => {
-        const li = document.createElement('li');
-        li.textContent = student;
-        studentList.appendChild(li);
-    });
-}
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                faculty: facultyName,
+                classId: classId
+            })
+        });
 
-// Populates faculty to a list.
-function populateFacultyList(faculty) {
-    const facultyList = document.getElementById('faculty-list');
-    facultyList.innerHTML = ''; // Clear existing list
+        // Refresh faculty list
+        await populateCurrentFacultyList(classId);
+        
+        alert("Faculty removed successfully!");
 
-    faculty.forEach(member => {
-        const li = document.createElement('li');
-        li.textContent = member;
-        facultyList.appendChild(li);
-    });
+    } catch (error) {
+        console.error("Error removing faculty:", error);
+        alert("Failed to remove faculty. Please try again or contact support.");
+    }
 }
