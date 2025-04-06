@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="css/student-styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <!-- Sidebar -->
@@ -17,7 +19,7 @@
                     <i class="fas fa-copy"></i>
                 </button>
             </div>
-            
+
             <nav class="nav-menu">
                 <button><i class="fas fa-user"></i> Profile</button>
                 <button><i class="fas fa-bell"></i> Notifications</button>
@@ -100,16 +102,26 @@
                                 <p id="commentsText">No additional comments</p>
                             </div>
                         </div>
-                        
+
                         <!-- Edit Mode (initially hidden) -->
                         <div id="editMode" class="details-edit hidden">
+
+                            <!-- code for with whom-->
                             <div class="detail-item">
                                 <label>With Whom</label>
-                                <input type="text" id="withWhomInput" value="Parents">
+                                <select id="withWhomInput" class="dropdown-select">
+                                    <option value="Parents">Parents</option>
+                                    <option value="Friends">Friends</option>
+                                    <option value="Roommates">Roommates</option>
+                                    <option value="Alone">Alone</option>
+                                    <!-- Empty placeholder for future backend integration -->
+                                    <option value="" disabled>─────────────</option>
+                                </select>
                             </div>
                             <div class="detail-item">
                                 <label>Current Place</label>
-                                <input type="text" id="currentPlaceInput" value="123 Main St, College Station, TX 77840">
+                                <input type="text" id="currentPlaceInput"
+                                    value="123 Main St, College Station, TX 77840">
                             </div>
                             <div class="detail-item">
                                 <label>Additional Comments</label>
@@ -125,28 +137,24 @@
             </div>
         </div>
 
-        <!-- Right Sidebar -->
-        <div class="right-sidebar">
-            <div class="card">
-                <div class="card-header">
-                    <h2><i class="fas fa-message"></i> Messages</h2>
-                </div>
-                <div class="card-content">
-                    <p class="no-content">No new messages</p>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2><i class="fas fa-clipboard-list"></i> Requests</h2>
-                </div>
-                <div class="card-content">
-                    <p class="no-content">No new requests</p>
+        <!-- SOS Button -->
+        <button class="sos-button">SOS</button>
+        <!-- SOS Button -->
+        <button id="sosButton" class="sos-button">SOS</button>
+        <!-- Emergency Details Form (initially hidden) -->
+        <div id="emergencyForm" class="emergency-form hidden">
+            <div class="emergency-form-content">
+                <h3>Emergency Details</h3>
+                <p>Please provide any additional information about your emergency:</p>
+                <textarea id="emergencyDetails" placeholder="Describe your situation..."></textarea>
+                <div class="emergency-form-actions">
+                    <button id="submitEmergencyDetails" class="save-btn">Submit</button>
+                    <button id="skipEmergencyDetails" class="cancel-btn">Skip</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script type="module" src="js/student.js"></script>
+        <script type="module" src="js/student.js"></script>
 </body>
+
 </html>

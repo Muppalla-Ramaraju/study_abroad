@@ -109,7 +109,9 @@ body {
     flex: 1;
     padding: 2rem;
     margin-left: 250px;
-    margin-right: 250px;
+    /* Remove this line or set it to 0 */
+    margin-right: 0;
+    /* Changed from 250px to 0 */
 }
 
 h1 {
@@ -228,7 +230,8 @@ h1 {
     position: relative;
 }
 
-.details-view, .details-edit {
+.details-view,
+.details-edit {
     display: grid;
     gap: 1.5rem;
 }
@@ -274,7 +277,8 @@ h1 {
     margin-top: 1rem;
 }
 
-.save-btn, .cancel-btn {
+.save-btn,
+.cancel-btn {
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
     cursor: pointer;
@@ -301,29 +305,133 @@ h1 {
     background-color: var(--gray-100);
 }
 
-/* Right Sidebar Styles */
-.right-sidebar {
-    width: 250px;
-    padding: 2rem 1rem;
-    position: fixed;
-    right: 0;
-    top: 0;
-    height: 100vh;
-    background-color: var(--gray-100);
-}
-
-.no-content {
-    color: var(--gray-600);
-    font-size: 0.875rem;
-}
 
 /* Success Animation */
 @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
 .copy-success {
     color: #22c55e;
     animation: fadeOut 1s ease-out forwards;
+}
+
+/* SOS Button Styles */
+.sos-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #dc2626;
+    /* Red color */
+    color: var(--white);
+    border: none;
+    border-radius: 50%;
+    /* Makes it circular */
+    width: 60px;
+    height: 60px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    /* Ensures it's above other elements */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+/* SOS Button Styles - Simplified */
+.sos-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #dc2626;
+    /* Red color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sos-button:hover {
+    background-color: #b91c1c;
+    /* Darker red on hover */
+}
+
+/* Emergency Form Styles */
+.emergency-form {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.emergency-form.hidden {
+    display: none;
+}
+
+.emergency-form-content {
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.emergency-form-content h3 {
+    color: var(--tamu-maroon);
+    margin-bottom: 10px;
+}
+
+.emergency-form-content textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.emergency-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Dropdown Styles */
+.dropdown-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    background-color: var(--white);
+    cursor: pointer;
+}
+
+.dropdown-select:focus {
+    outline: none;
+    border-color: var(--tamu-maroon);
+    box-shadow: 0 0 0 2px rgba(80, 0, 0, 0.1);
 }

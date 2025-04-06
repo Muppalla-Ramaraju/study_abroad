@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const navButtons = document.querySelectorAll('.nav-menu button');
     const logoutBtn = document.querySelector('.logout-btn');
     const textarea = document.getElementById('commentsInput');
+    const sosButton = document.getElementById('sosButton');
 
     // API Configuration
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
@@ -115,6 +116,121 @@ document.addEventListener('DOMContentLoaded', async function () {
             getLocationBtn.disabled = false;
             getLocationBtn.innerHTML = 'Get Current Location';
         }
+    });
+
+
+    // SOS Button Functionality
+    if (sosButton) {
+        sosButton.addEventListener('click', async function () {
+            this.disabled = true;
+            const originalText = this.textContent;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    });
+                });
+
+                const latitude = position.coords.latitude.toFixed(6);
+                const longitude = position.coords.longitude.toFixed(6);
+                const coords = `${latitude},${longitude}`;
+                coordinatesDisplay.textContent = coords;
+
+                // Reverse geocode to get the address
+                const address = await getAddressFromCoordinates(latitude, longitude);
+
+                // Display the address
+                addressDisplay.textContent = address;
+
+                // Send location, address, and name to your API
+                const payload = {
+                    id: idToken,
+                    latitude: latitude,
+                    longitude: longitude,
+                    address: address,
+                    name: userName,
+                    emergency: true // Add this flag to indicate emergency
+                };
+                console.log('Emergency payload being sent to API:', payload);
+
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('API request failed');
+
+                const responseData = await response.json();
+                console.log('Emergency location sent successfully:', responseData);
+
+                // Display Google Maps link
+                const mapsLinkUrl = responseData.mapsLink;
+                if (mapsLinkUrl) {
+                    mapsLink.textContent = 'View on Google Maps';
+                    mapsLink.href = mapsLinkUrl;
+                }
+
+                // First show the success alert
+                alert('Emergency signal sent successfully.');
+
+                // Then show the emergency form for additional details
+                document.getElementById('emergencyForm').classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert(error.message || "Unable to send emergency signal");
+            } finally {
+                // Re-enable the button and restore original text
+                this.disabled = false;
+                this.textContent = originalText;
+            }
+        });
+    }
+
+    // Emergency form event listeners
+    document.getElementById('submitEmergencyDetails')?.addEventListener('click', async function () {
+        const emergencyDetails = document.getElementById('emergencyDetails').value;
+
+        // Send the additional details to your API
+        try {
+            const additionalPayload = {
+                id: idToken,
+                emergencyDetails: emergencyDetails,
+                coordinates: coordinatesDisplay.textContent,
+                address: addressDisplay.textContent
+            };
+
+            const response = await fetch(`${API_ENDPOINT}/emergency-details`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify(additionalPayload)
+            });
+
+            if (!response.ok) throw new Error('Failed to send emergency details');
+
+            alert('Emergency details submitted successfully.');
+            document.getElementById('emergencyForm').classList.add('hidden');
+        } catch (error) {
+            console.error('Error sending emergency details:', error);
+            alert('Emergency signal was sent, but we could not submit additional details.');
+            document.getElementById('emergencyForm').classList.add('hidden');
+        }
+    });
+
+    document.getElementById('skipEmergencyDetails')?.addEventListener('click', function () {
+        alert('Emergency signal sent successfully.');
+        document.getElementById('emergencyForm').classList.add('hidden');
     });
 
     // Additional Details Edit Mode Toggle
