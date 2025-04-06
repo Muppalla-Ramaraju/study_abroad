@@ -14,38 +14,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     initSessionChecker();
 
+    // Fetch class details
+    try {
+        const classDetails = await fetchClassDetails(classId, idToken);
+        document.getElementById('class-name').textContent = classDetails.name;
+        document.getElementById('faculty-name').textContent = classDetails.faculty;
+    } catch (error) {
+        console.error("Error loading class details:", error);
+        document.getElementById('class-name').textContent = "Error loading class details";
+        document.getElementById('faculty-name').textContent = "Error loading faculty details";
+    }
+
     // Populate student dropdown
-    await populateStudentDropdown();
+    await populateStudentDropdown(idToken);
 
     // Populate current students list
-    await populateCurrentStudentsList(classId);
+    await populateCurrentStudentsList(classId, idToken);
 
     // Handle Add Student Button
     document.getElementById("addStudentForm").addEventListener("submit", async (event) => {
         event.preventDefault();
-        await addStudentToClass(classId);
+        await addStudentToClass(classId, idToken);
     });
 
     // Populate faculty dropdown
-    await populateFacultyDropdown();
+    await populateFacultyDropdown(idToken);
 
     // Populate current faculty list
-    await populateCurrentFacultyList(classId);
+    await populateCurrentFacultyList(classId, idToken);
 
     // Handle Add Faculty Button
     document.getElementById("addFacultyForm").addEventListener("submit", async (event) => {
         event.preventDefault();
-        await addFacultyToClass(classId);
+        await addFacultyToClass(classId, idToken);
     });
 });
 
-// Populate student dropdown
-async function populateStudentDropdown() {
+async function fetchClassDetails(classId, idToken) {
+    const apiUrl = `https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/getclassdetails`;
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ classId: classId }) // Send classId in the body
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch class details, status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Fetched class details:', data);
+        return data;
+    } catch (error) {
+        console.error("Error fetching class details:", error);
+        throw error;
+    }
+}
+
+
+async function populateStudentDropdown(idToken) {
     const studentDropdown = document.getElementById("studentEmail");
     const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students";
 
     try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json'
+            },
+        });
         if (!response.ok) {
             throw new Error("Failed to fetch student data");
         }
@@ -63,8 +104,7 @@ async function populateStudentDropdown() {
     }
 }
 
-// Populate current students list
-async function populateCurrentStudentsList(classId) {
+async function populateCurrentStudentsList(classId, idToken) {
     const studentList = document.getElementById("student-list");
     const apiUrl = `https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students/list`;
 
@@ -72,7 +112,8 @@ async function populateCurrentStudentsList(classId) {
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                 'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({ classId }) // Send classId in the request body
         });
@@ -83,9 +124,6 @@ async function populateCurrentStudentsList(classId) {
         
         const data = await response.json();
         const students = data.studentsList || [];
-        
-        // Update student count in the UI
-        document.getElementById("members-count").textContent = students.length;
         
         // Clear and populate the student list
         studentList.innerHTML = ''; 
@@ -104,7 +142,7 @@ async function populateCurrentStudentsList(classId) {
             const removeBtn = document.createElement("button");
             removeBtn.textContent = "Remove";
             removeBtn.className = "remove-btn";
-            removeBtn.addEventListener("click", () => removeStudentFromClass(classId, student));
+            removeBtn.addEventListener("click", () => removeStudentFromClass(classId, student, idToken));
             li.appendChild(removeBtn);
             
             studentList.appendChild(li);
@@ -115,8 +153,7 @@ async function populateCurrentStudentsList(classId) {
     }
 }
 
-// Add student to class
-async function addStudentToClass(classId) {
+async function addStudentToClass(classId, idToken) {
     const studentDropdown = document.getElementById("studentEmail");
     const selectedStudent = studentDropdown.value;
 
@@ -131,7 +168,8 @@ async function addStudentToClass(classId) {
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({
                 student: selectedStudent,
@@ -146,15 +184,14 @@ async function addStudentToClass(classId) {
         alert("Student added successfully!");
         
         // Refresh student list
-        await populateCurrentStudentsList(classId);
+        await populateCurrentStudentsList(classId, idToken);
 
     } catch (error) {
         console.error("Error adding student:", error);
     }
 }
 
-// Remove student from class
-async function removeStudentFromClass(classId, studentName) {
+async function removeStudentFromClass(classId, studentName, idToken) {
     if (!confirm(`Are you sure you want to remove ${studentName} from this class?`)) {
         return;
     }
@@ -165,7 +202,8 @@ async function removeStudentFromClass(classId, studentName) {
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                 'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({
                 student: studentName,
@@ -174,7 +212,7 @@ async function removeStudentFromClass(classId, studentName) {
         });
 
         // Refresh student list
-        await populateCurrentStudentsList(classId);
+        await populateCurrentStudentsList(classId, idToken);
         
         alert("Student removed successfully!");
 
@@ -184,13 +222,17 @@ async function removeStudentFromClass(classId, studentName) {
     }
 }
 
-// Populate faculty dropdown
-async function populateFacultyDropdown() {
+async function populateFacultyDropdown(idToken) {
     const facultyDropdown = document.getElementById("facultyEmail");
     const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/faculty";
 
     try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, {
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json'
+            },
+        });
         if (!response.ok) {
             throw new Error("Failed to fetch faculty data");
         }
@@ -208,50 +250,12 @@ async function populateFacultyDropdown() {
     }
 }
 
-// Populate current faculty list for a class
-/*async function populateCurrentFacultyList(classId) {
-    const membersCount = document.getElementById("members-count"); // Get members count element
-
-    // Check if the members-count element exists
-    if (!membersCount) {
-        console.error("members-count element not found in the DOM");
-        return;
-    }
-
-    const apiUrl = `https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/faculty/list`;
-
-    try {
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ classId }) // Send classId in the request body
-        });
-        
-        if (!response.ok) {
-            throw new Error("Failed to fetch faculty data");
-        }
-        
-        const data = await response.json();
-        const facultyMembers = data.facultyList || [];
-        
-        // Increment the members count by 1 for each faculty member
-        membersCount.textContent = parseInt(membersCount.textContent, 10) + facultyMembers.length; 
-        
-    } catch (error) {
-        console.error("Error fetching faculty list:", error);
-        membersCount.textContent = 'Failed to load member count';
-    }
-}*/
-
-async function populateCurrentFacultyList(classId) {
+async function populateCurrentFacultyList(classId, idToken) {
     const facultyList = document.getElementById("faculty-list");
-    const membersCount = document.getElementById("members-count"); // Get members count element
 
     // Check if the faculty-list or members-count element exists
-    if (!facultyList || !membersCount) {
-        console.error("faculty-list or members-count element not found in the DOM");
+    if (!facultyList) {
+        console.error("faculty-list element not found in the DOM");
         return;
     }
 
@@ -261,7 +265,8 @@ async function populateCurrentFacultyList(classId) {
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({ classId }) // Send classId in the request body
         });
@@ -272,9 +277,6 @@ async function populateCurrentFacultyList(classId) {
         
         const data = await response.json();
         const facultyMembers = data.facultyList || [];
-        
-        // Increment members count by 1 each time data is fetched
-        membersCount.textContent = parseInt(membersCount.textContent, 10) + 1; 
         
         // Clear and populate the faculty list
         facultyList.innerHTML = ''; 
@@ -293,7 +295,7 @@ async function populateCurrentFacultyList(classId) {
             const removeBtn = document.createElement("button");
             removeBtn.textContent = "Remove";
             removeBtn.className = "remove-btn";
-            removeBtn.addEventListener("click", () => removeFacultyFromClass(classId, faculty));
+            removeBtn.addEventListener("click", () => removeFacultyFromClass(classId, faculty, idToken));
             li.appendChild(removeBtn);
             
             facultyList.appendChild(li);
@@ -304,9 +306,7 @@ async function populateCurrentFacultyList(classId) {
     }
 }
 
-
-// Add faculty to class
-async function addFacultyToClass(classId) {
+async function addFacultyToClass(classId, idToken) {
     const facultyDropdown = document.getElementById("facultyEmail");
     const selectedFaculty = facultyDropdown.value;
 
@@ -321,7 +321,8 @@ async function addFacultyToClass(classId) {
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                 'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({
                 faculty: selectedFaculty,
@@ -336,15 +337,14 @@ async function addFacultyToClass(classId) {
         alert("Faculty added successfully!");
         
         // Refresh faculty list
-        await populateCurrentFacultyList(classId);
+        await populateCurrentFacultyList(classId, idToken);
 
     } catch (error) {
         console.error("Error adding faculty:", error);
     }
 }
 
-// Remove faculty from class
-async function removeFacultyFromClass(classId, facultyName) {
+async function removeFacultyFromClass(classId, facultyName, idToken) {
     if (!confirm(`Are you sure you want to remove ${facultyName} from this class?`)) {
         return;
     }
@@ -355,7 +355,8 @@ async function removeFacultyFromClass(classId, facultyName) {
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({
                 faculty: facultyName,
@@ -364,7 +365,7 @@ async function removeFacultyFromClass(classId, facultyName) {
         });
 
         // Refresh faculty list
-        await populateCurrentFacultyList(classId);
+        await populateCurrentFacultyList(classId, idToken);
         
         alert("Faculty removed successfully!");
 

@@ -12,42 +12,32 @@ let currentGroups = [];
 let previousGroups = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Get session data
-    const { idToken, userRole, tokenExpiresAt } = getSession();
+    const { idToken, userRole } = getSession();
 
-    // Check if session is expired or invalid
     if (!idToken || userRole !== 'admin') {
         logout();
         window.location.href = 'login.html';
         return;
     }
 
-    // Initialize session checker to periodically check token expiration and refresh tokens if needed
+    //session check
     initSessionChecker();
 
     lucide.createIcons();
-
-    // Fetch and populate classes
     await fetchAndPopulateClasses();
-
-    // Setup see all buttons
     setupSeeAllButtons();
-
-    // Setup create group button
     setupCreateGroupButton();
 
-    // Logout button functionality
     const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             if (confirm('Are you sure you want to log out?')) {
-                logout(); // Logout action
+                logout();
             }
         });
     }
 });
 
-// New function to fetch and populate classes from the API
 async function fetchAndPopulateClasses() {
     try {
         const response = await fetch(`${API_ENDPOINT}`, {
@@ -64,12 +54,10 @@ async function fetchAndPopulateClasses() {
 
         allGroups = await response.json();
 
-        // Distinguish between current and previous classes using logic, using a field or date
         const now = new Date();
-        currentGroups = allGroups.filter(group => new Date(group.lastActive).getTime() > (now.getTime() - ACTIVE_THRESHOLD));
-        previousGroups = allGroups.filter(group => new Date(group.lastActive).getTime() <= (now.getTime() - ACTIVE_THRESHOLD));
+        currentGroups = allGroups.filter(group => new Date(group.createdOn).getTime() > (now.getTime() - ACTIVE_THRESHOLD));
+        previousGroups = allGroups.filter(group => new Date(group.createdOn).getTime() <= (now.getTime() - ACTIVE_THRESHOLD));
 
-        // Populate the groups in the UI
         populateGroups();
 
     } catch (error) {
@@ -78,36 +66,26 @@ async function fetchAndPopulateClasses() {
     }
 }
 
-// Function to populate groups with initial 3 visible
 function populateGroups() {
     const currentGroupsContainer = document.querySelector('.current-groups');
     const previousGroupsContainer = document.querySelector('.previous-groups');
 
-    // Clear existing content
     currentGroupsContainer.innerHTML = '';
     previousGroupsContainer.innerHTML = '';
 
-    // Function to append groups to a container
     function appendGroups(groups, container) {
         groups.forEach((group, index) => {
             const card = createCard(group);
-
-            // Hide groups after first 3
             if (index >= 3) {
                 card.classList.add('row-hidden');
             }
-
             container.appendChild(card);
         });
     }
 
-    // Add current groups (initially first 3)
     appendGroups(currentGroups, currentGroupsContainer);
-
-    // Add previous groups (initially first 3)
     appendGroups(previousGroups, previousGroupsContainer);
 
-    //  Visibility of "See All" buttons
     const currentSeeAllBtn = document.querySelector('.see-all-btn[data-section="current"]');
     const previousSeeAllBtn = document.querySelector('.see-all-btn[data-section="previous"]');
 
@@ -115,18 +93,18 @@ function populateGroups() {
     previousSeeAllBtn.classList.toggle('hidden', previousGroups.length <= 3);
 }
 
-// Function to create a card element
 function createCard(group) {
     const card = document.createElement('div');
     card.className = 'card';
-    card.setAttribute('data-id', group.classId); // Changed to classId
+    card.setAttribute('data-id', group.classId);
+
+    const createdOnDate = new Date(group.createdOn).toLocaleDateString();
 
     card.innerHTML = `
         <h3>${group.name}</h3>
         <div class="card-info">
-            <p>Members: <span>${group.members}</span></p>
             <p>Faculty: <span>${group.faculty}</span></p>
-            <p>Last Active: <span>${group.lastActive}</span></p>
+            <p>Created On: <span>${createdOnDate}</span></p>
         </div>
     `;
 
@@ -135,14 +113,11 @@ function createCard(group) {
     return card;
 }
 
-// Function to handle card clicks
 function handleCardClick(group) {
     console.log(`Clicked group: ${group.name}`);
-    // Redirect to the new class details page
     window.location.href = `class-details.html?classId=${group.classId}`;
 }
 
-// Setup see all buttons functionality
 function setupSeeAllButtons() {
     const seeAllButtons = document.querySelectorAll('.see-all-btn');
 
@@ -152,18 +127,15 @@ function setupSeeAllButtons() {
             const container = document.querySelector(`.${section}-groups`);
             const hiddenCards = container.querySelectorAll('.row-hidden');
 
-            // Show all hidden cards
             hiddenCards.forEach(card => {
                 card.classList.remove('row-hidden');
             });
 
-            // Hide the "See All" button after it's clicked
             button.classList.add('hidden');
         });
     });
 }
 
-// Setup create group button functionality
 function setupCreateGroupButton() {
     const createGroupBtn = document.querySelector('.create-group-btn');
 
@@ -215,6 +187,7 @@ const handleAddClass = async (event) => {
             body: JSON.stringify({
                 className,
                 facultyName
+                // createdOn should be added server-side for integrity
             })
         });
 
@@ -225,31 +198,21 @@ const handleAddClass = async (event) => {
 
         const newClass = await response.json();
 
-        //  Add the new class to the local state
         allGroups.push({
-            classId: newClass.classId, // Ensure the ID is set correctly
+            classId: newClass.classId,
             name: newClass.name,
             faculty: newClass.faculty,
-            members: newClass.members || 0,
-            lastActive: newClass.lastActive
+            createdOn: newClass.createdOn
         });
 
-        // Distinguish between current and previous classes using logic, using a field or date
         const now = new Date();
-        currentGroups = allGroups.filter(group => new Date(group.lastActive).getTime() > (now.getTime() - ACTIVE_THRESHOLD));
-        previousGroups = allGroups.filter(group => new Date(group.lastActive).getTime() <= (now.getTime() - ACTIVE_THRESHOLD));
+        currentGroups = allGroups.filter(group => new Date(group.createdOn).getTime() > (now.getTime() - ACTIVE_THRESHOLD));
+        previousGroups = allGroups.filter(group => new Date(group.createdOn).getTime() <= (now.getTime() - ACTIVE_THRESHOLD));
 
-        //  Refresh the UI to reflect the new class
         populateGroups();
-
-        //  Close the modal after adding
         document.querySelector('.modal').remove();
     } catch (error) {
         console.error('Error adding class:', error);
         alert(`Failed to add class: ${error.message}`);
     }
 };
-
-
-
-
