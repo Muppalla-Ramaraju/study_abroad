@@ -1,0 +1,437 @@
+/* Global Styles */
+:root {
+    --tamu-maroon: #500000;
+    --tamu-maroon-dark: #400000;
+    --white: #ffffff;
+    --gray-100: #f5f5f5;
+    --gray-200: #eeeeee;
+    --gray-300: #e0e0e0;
+    --gray-600: #666666;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+    background-color: var(--gray-100);
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background-color: var(--tamu-maroon);
+    color: var(--white);
+    padding: 1.5rem;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.profile-pic {
+    width: 80px;
+    height: 80px;
+    background-color: var(--gray-300);
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+}
+
+.nav-menu button {
+    width: 100%;
+    padding: 0.75rem;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.nav-menu button:hover {
+    background-color: var(--tamu-maroon-dark);
+}
+
+.nav-menu button i {
+    margin-right: 0.5rem;
+    width: 20px;
+}
+
+/* Logout Button */
+.logout-btn {
+    margin-top: auto;
+    width: 100%;
+    padding: 0.75rem;
+    background: none;
+    border: 1px solid var(--white);
+    color: var(--white);
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.logout-btn:hover {
+    background-color: var(--white);
+    color: var(--tamu-maroon);
+}
+
+/* Main Content Styles */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    margin-left: 250px;
+    /* Remove this line or set it to 0 */
+    margin-right: 0;
+    /* Changed from 250px to 0 */
+}
+
+h1 {
+    color: var(--tamu-maroon);
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h2 {
+    color: var(--tamu-maroon);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-content {
+    padding: 1rem;
+}
+
+/* Task Styles */
+.task {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.due {
+    color: #f97316;
+}
+
+.overdue {
+    color: #dc2626;
+}
+
+/* Location Styles */
+.location-btn {
+    background-color: var(--tamu-maroon);
+    color: var(--white);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.location-btn:hover {
+    background-color: var(--tamu-maroon-dark);
+}
+
+.coordinates {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    background-color: var(--gray-100);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-600);
+    padding: 0.25rem;
+    transition: color 0.2s;
+}
+
+.copy-btn:hover {
+    color: var(--tamu-maroon);
+}
+
+.maps-link {
+    color: var(--tamu-maroon);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+/* Additional Details Styles */
+.edit-btn {
+    background-color: var(--tamu-maroon);
+    color: var(--white);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.edit-btn:hover {
+    background-color: var(--tamu-maroon-dark);
+}
+
+.details-container {
+    position: relative;
+}
+
+.details-view,
+.details-edit {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.hidden {
+    display: none;
+}
+
+.detail-item {
+    margin-bottom: 1rem;
+}
+
+.detail-item label {
+    color: var(--gray-600);
+    font-size: 0.875rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.detail-item p {
+    margin: 0;
+    padding: 0.5rem 0;
+}
+
+.detail-item input,
+.detail-item textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.detail-item textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.save-btn,
+.cancel-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-btn {
+    background-color: var(--tamu-maroon);
+    color: var(--white);
+    border: none;
+}
+
+.save-btn:hover {
+    background-color: var(--tamu-maroon-dark);
+}
+
+.cancel-btn {
+    background-color: var(--white);
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+}
+
+.cancel-btn:hover {
+    background-color: var(--gray-100);
+}
+
+
+/* Success Animation */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.copy-success {
+    color: #22c55e;
+    animation: fadeOut 1s ease-out forwards;
+}
+
+/* SOS Button Styles */
+.sos-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #dc2626;
+    /* Red color */
+    color: var(--white);
+    border: none;
+    border-radius: 50%;
+    /* Makes it circular */
+    width: 60px;
+    height: 60px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    /* Ensures it's above other elements */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+/* SOS Button Styles - Simplified */
+.sos-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #dc2626;
+    /* Red color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sos-button:hover {
+    background-color: #b91c1c;
+    /* Darker red on hover */
+}
+
+/* Emergency Form Styles */
+.emergency-form {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.emergency-form.hidden {
+    display: none;
+}
+
+.emergency-form-content {
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.emergency-form-content h3 {
+    color: var(--tamu-maroon);
+    margin-bottom: 10px;
+}
+
+.emergency-form-content textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.emergency-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Dropdown Styles */
+.dropdown-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    background-color: var(--white);
+    cursor: pointer;
+}
+
+.dropdown-select:focus {
+    outline: none;
+    border-color: var(--tamu-maroon);
+    box-shadow: 0 0 0 2px rgba(80, 0, 0, 0.1);
+}

@@ -16,7 +16,7 @@ document.getElementById('verifyForm').addEventListener('submit', async function 
     }
 
     try {
-        const response = await fetch('https://fgwxjjo7j9.execute-api.us-east-1.amazonaws.com/test/users', {
+        const response = await fetch('https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

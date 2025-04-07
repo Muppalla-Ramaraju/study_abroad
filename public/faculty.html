@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - TAMU</title>
+    <link rel="stylesheet" href="css/faculty-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="profile">
+                <div class="profile-pic-container">
+                    <img id="profilePic" src="default-profile.png" alt="Profile Picture" class="profile-pic">
+                    <label for="profilePicInput" class="profile-pic-overlay">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="profilePicInput" accept="image/*" hidden>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-item">
+                    <i class="fas fa-user"></i> Profile
+                </button>
+                <button class="nav-item">
+                    <i class="fas fa-bell"></i> Notifications
+                </button>
+                <button class="nav-item">
+                    <i class="fas fa-shield-alt"></i> Sign-in & Security
+                </button>
+                <button class="nav-item">
+                    <i class="fas fa-question-circle"></i> Help
+                </button>
+                <button class="nav-item">
+                    <i class="fas fa-cog"></i> Account Settings
+                </button>
+            </nav>
+
+            <button class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Log Out
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="dashboardContent">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <h1>Welcome to Your Dashboard, Professor</h1>
+                <!-- Button to fetch student details -->
+                <button id="getStudentDetailsBtn" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i> Refresh Student Locations
+                </button>
+            </div>
+
+            <!-- Student Location Tracking Section -->
+            <div class="section student-locations">
+                <div class="section-header">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h2>Real-time Student Locations</h2>
+                </div>
+                <!-- Dynamic table container -->
+                <div id="studentDetailsContainer" class="table-container">
+                    <!-- Placeholder for when no data is loaded -->
+                    <div class="no-data">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <p>Click "Refresh Student Locations" to view check-ins</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <hr class="section-divider">
+
+            <!-- Current Assignments Section -->
+            <div class="section assignments-section">
+                <h2>Current Assignments: ISTM 631</h2>
+                <!-- Example table for current assignments -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STUDENT NAME</th>
+                                <th>LOCATION</th>
+                                <th>COMPANION</th>
+                                <th>COMMENTS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Example rows -->
+                            <tr>
+                                <td>John Doe</td>
+                                <td><a href="https://www.google.com/maps?q=30.6280,-96.3344" target="_blank">30.6280° N, 96.3344° W</a></td>
+                                <td>Jane Smith</td>
+                                <td>Meeting at Starbucks - Century Square</td>
+                            </tr>
+                            <tr>
+                                <td>Alice Johnson</td>
+                                <td><a href="https://www.google.com/maps?q=30.6188,-96.3365" target="_blank">30.6188° N, 96.3365° W</a></td>
+                                <td>Bob Wilson</td>
+                                <td>Research discussion at Sweet Paris</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <hr class="section-divider">
+
+            <!-- Previous Assignments Section -->
+            <div class="section previous-assignments">
+                <!-- Section header -->
+                <div class="section-header">
+                    <i class="fas fa-clock"></i>
+                    <h2>Previous Assignments</h2>
+                </div>
+
+                <!-- Example course grid -->
+                <div class="course-grid">
+                    <!-- Example course cards -->
+                    <div class="course-card clickable">
+                        <h3>ISTM 631</h3>
+                        <p>Last checked: 14/02/2024</p>
+                    </div>
+                    <div class="course-card clickable">
+                        <h3>ISTM 615</h3>
+                        <p>Last checked: 09/02/2024</p>
+                    </div>
+                    <div class="course-card clickable">
+                        <h3>ISTM 645</h3>
+                        <p>Last checked: 04/02/2024</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="notification-panel">
+                <div class="panel-header">
+                    <i class="far fa-comment-alt"></i>
+                    <h3>Messages</h3>
+                </div>
+                <div class="panel-content">
+                    <p class="no-content">No new messages</p>
+                </div>
+            </div>
+
+            <div class="notification-panel">
+                <div class="panel-header">
+                    <i class="far fa-clipboard"></i>
+                    <h3>Requests</h3>
+                </div>
+                <div class="panel-content">
+                    <p class="no-content">No new requests</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/faculty.js"></script>
+</body>
+</html>

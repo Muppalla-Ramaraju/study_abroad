@@ -20,11 +20,11 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" placeholder="Enter your email">
+                    <input type="email" id="email" placeholder="Enter your email" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password">
+                    <input type="password" id="password" placeholder="Enter your password" required>
                 </div>
                 <div class="form-options">
                     <label class="remember-me">
@@ -35,11 +35,12 @@
                 </div>
                 <button type="submit" class="login-btn">Login</button>
                 <p class="signup-text">
-                    Don't have an account? <a href="#" class="signup-link">Sign up</a>
+                    Don't have an account? <a href="signup.html" class="signup-link">Sign up</a>
                 </p>
+                <div id="loginStatus"></div>
             </form>
         </div>
     </div>
-    <script src="js/login.js"></script>
+    <script src="js/login.js" type="module"></script>
 </body>
 </html>
