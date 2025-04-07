@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const logoutBtn = document.querySelector('.logout-btn');
     const textarea = document.getElementById('commentsInput');
     const sosButton = document.getElementById('sosButton');
+    const withWhomInput = document.getElementById('withWhomInput'); // Add this line
 
     // API Configuration
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
@@ -117,7 +118,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             getLocationBtn.innerHTML = 'Get Current Location';
         }
     });
-
 
     // SOS Button Functionality
     if (sosButton) {
@@ -234,11 +234,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Additional Details Edit Mode Toggle
-    editDetailsBtn.addEventListener('click', function () {
+    editDetailsBtn.addEventListener('click', async function () {
         viewMode.classList.add('hidden');
         editMode.classList.remove('hidden');
 
-        document.getElementById('withWhomInput').value = document.getElementById('withWhomText').textContent;
+        //populate dropdown on edit
+        await populateStudentDropdown(idToken);
         document.getElementById('currentPlaceInput').value = document.getElementById('currentPlaceText').textContent;
         document.getElementById('commentsInput').value = document.getElementById('commentsText').textContent;
     });
@@ -310,5 +311,34 @@ document.addEventListener('DOMContentLoaded', async function () {
             this.style.height = 'auto';
             this.style.height = `${this.scrollHeight}px`;
         });
+    }
+
+    // Populate student dropdown
+    async function populateStudentDropdown(idToken) {
+        const studentDropdown = document.getElementById("withWhomInput");
+        const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students"; // Replace with your API endpoint
+
+        try {
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${idToken}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+            if (!response.ok) {
+                throw new Error("Failed to fetch student data");
+            }
+            const students = await response.json();
+
+            studentDropdown.innerHTML = ""; // Clear existing options
+            students.forEach(student => {
+                const option = document.createElement("option");
+                option.value = student.name;
+                option.textContent = student.name;
+                studentDropdown.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Error loading students:", error);
+        }
     }
 });

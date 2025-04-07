@@ -20,7 +20,7 @@
                     <input type="file" id="profilePicInput" accept="image/*" hidden>
                 </div>
             </div>
-            
+
             <nav class="nav-menu">
                 <button class="nav-item active" data-page="dashboard">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -49,19 +49,38 @@
 
         <!-- Main Content -->
         <div class="main-content" id="dashboardContent">
-            <h1>Welcome to Your Dashboard, Professor</h1>
-
-            <div class="create-checkin">
-                <button id="createCheckinBtn" class="checkin-btn">
-                    <i class="fas fa-plus"></i> Create Check-in
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <h1>Welcome to Your Dashboard, Professor</h1>
+                <!-- Button to fetch student details -->
+                <button id="getStudentDetailsBtn" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i> Refresh Student Locations
                 </button>
             </div>
 
+            <!-- Student Location Tracking Section -->
+            <div class="section student-locations">
+                <div class="section-header">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h2>Real-time Student Locations</h2>
+                </div>
+                <!-- Dynamic table container -->
+                <div id="studentDetailsContainer" class="table-container">
+                    <!-- Placeholder for when no data is loaded -->
+                    <div class="no-data">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <p>Click "Refresh Student Locations" to view check-ins</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
             <hr class="section-divider">
 
             <!-- Current Assignments Section -->
             <div class="section assignments-section">
                 <h2>Current Assignments: ISTM 631</h2>
+                <!-- Example table for current assignments -->
                 <div class="table-container">
                     <table>
                         <thead>
@@ -73,6 +92,7 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- Example rows -->
                             <tr>
                                 <td>John Doe</td>
                                 <td><a href="https://www.google.com/maps?q=30.6280,-96.3344" target="_blank">30.6280° N, 96.3344° W</a></td>
@@ -90,15 +110,20 @@
                 </div>
             </div>
 
+            <!-- Divider -->
             <hr class="section-divider">
 
             <!-- Previous Assignments Section -->
             <div class="section previous-assignments">
+                <!-- Section header -->
                 <div class="section-header">
                     <i class="fas fa-clock"></i>
                     <h2>Previous Assignments</h2>
                 </div>
+
+                <!-- Example course grid -->
                 <div class="course-grid">
+                    <!-- Example course cards -->
                     <div class="course-card clickable">
                         <h3>ISTM 631</h3>
                         <p>Last checked: 14/02/2024</p>
@@ -113,7 +138,9 @@
                     </div>
                 </div>
             </div>
+
         </div>
+
 
         <!-- Right Sidebar -->
         <div class="right-sidebar">
