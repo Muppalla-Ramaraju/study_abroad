@@ -16,6 +16,28 @@
     background-color: #f9f9f9;
 }
 
+/* Class Details Header with Delete Button */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Delete Button */
+.delete-btn {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.delete-btn:hover {
+    background-color: #ff7875;
+}
+
 h2,
 h3 {
     color: #333;
@@ -38,7 +60,7 @@ select {
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+    box-sizing: border-box;
 }
 
 button {
@@ -54,6 +76,20 @@ button:hover {
     background-color: #449d44;
 }
 
+.remove-btn {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.remove-btn:hover {
+    background-color: #ff7875;
+}
+
 ul {
     list-style-type: none;
     padding: 0;
@@ -62,86 +98,41 @@ ul {
 li {
     padding: 8px 12px;
     border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 li:last-child {
     border-bottom: none;
 }
 
-/* Basic Styling for the Modal */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    z-index: 1000; /* Ensure it sits on top of everything */
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-.student-item {
+/* Navigation Buttons Container */
+.navigation-buttons {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
+    margin-top: 30px;
+    padding: 15px 0;
 }
 
-.student-name {
-    flex-grow: 1;
+/* Previous Button */
+.prev-btn {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-.remove-btn {
-    background-color: #ff4d4f;
+/* Save Button */
+.save-btn {
+    background-color: #5cb85c;
     color: white;
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
-    padding: 4px 8px;
     cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.remove-btn:hover {
-    background-color: #ff7875;
-}
-
-
-/* Style for faculty list items */
-.faculty-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.faculty-name {
-    flex-grow: 1;
-}
-
-.remove-btn {
-    background-color: #ff4d4f;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 8px;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-/* Hover effect for the remove button */
-.remove-btn:hover {
-    background-color: #ff7875;
+    font-weight: bold;
 }
