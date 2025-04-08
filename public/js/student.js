@@ -16,25 +16,33 @@ document.addEventListener('DOMContentLoaded', async function () {
     // DOM Elements
     const getLocationBtn = document.getElementById('getLocation');
     const coordinatesDisplay = document.getElementById('coordinates');
-    const addressDisplay = document.getElementById('addressDisplay'); // Added for address display
-    const editDetailsBtn = document.getElementById('editDetails');
-    const viewMode = document.getElementById('viewMode');
-    const editMode = document.getElementById('editMode');
-    const saveDetailsBtn = document.getElementById('saveDetails');
-    const cancelEditBtn = document.getElementById('cancelEdit');
-    const mapsLink = document.querySelector('.maps-link');
+    const addressDisplay = document.getElementById('addressDisplay');
+    const withWhomInput = document.getElementById('withWhomInput');
+    const currentPlaceInput = document.getElementById('currentPlaceInput');
+    const commentsInput = document.getElementById('commentsInput');
+    const checkInBtn = document.getElementById('checkInBtn');
+    const mapsLink = document.getElementById('mapsLink');
     const navButtons = document.querySelectorAll('.nav-menu button');
     const logoutBtn = document.querySelector('.logout-btn');
-    const textarea = document.getElementById('commentsInput');
     const sosButton = document.getElementById('sosButton');
-    const withWhomInput = document.getElementById('withWhomInput'); // Add this line
+    const emergencyForm = document.getElementById('emergencyForm');
+    const emergencyDetails = document.getElementById('emergencyDetails');
+    const submitEmergencyDetails = document.getElementById('submitEmergencyDetails');
+    const skipEmergencyDetails = document.getElementById('skipEmergencyDetails');
 
     // API Configuration
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
-    const GEOAPIFY_API_KEY = 'f6a76cacf081475897b4d70fd23f3d62'; // Your Geoapify API key
+    const GEOAPIFY_API_KEY = 'f6a76cacf081475897b4d70fd23f3d62';
 
     // Get user name from local storage
     const userName = localStorage.getItem('name');
+
+    // Track location data
+    let currentLocation = {
+        latitude: null,
+        longitude: null,
+        address: null
+    };
 
     // Function to get address from coordinates using Geoapify Reverse Geocoding API
     async function getAddressFromCoordinates(lat, lon) {
@@ -54,40 +62,39 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Get Current Location with API Integration
-    getLocationBtn.addEventListener('click', async function () {
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
+    // Function to get current position
+    async function getCurrentPosition() {
+        return new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        });
+    }
+
+    // Function to send check-in data
+    async function sendCheckInData(isEmergency = false, emergencyMessage = '') {
+        if (!currentLocation.latitude || !currentLocation.longitude) {
+            alert('Please get your current location first.');
+            return false;
+        }
 
         try {
-            const position = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject, {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                });
-            });
-
-            const latitude = position.coords.latitude.toFixed(6);
-            const longitude = position.coords.longitude.toFixed(6);
-            const coords = `${latitude},${longitude}`;
-            coordinatesDisplay.textContent = coords;
-
-            // Reverse geocode to get the address
-            const address = await getAddressFromCoordinates(latitude, longitude);
-
-            // Display the address
-            addressDisplay.textContent = address;
-
-            // Send location, address, and name to your API
             const payload = {
                 id: idToken,
-                latitude: latitude,
-                longitude: longitude,
-                address: address,
-                name: userName // Include the name in the payload
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+                address: currentLocation.address,
+                name: userName,
+                peers: withWhomInput.value,
+                place: currentPlaceInput.value,
+                comments: commentsInput.value,
+                emergency: isEmergency,
+                emergencyDetails: emergencyMessage
             };
-            console.log('Payload being sent to API:', payload);  // Debugging
+
+            console.log('Payload being sent to API:', payload);
 
             const response = await fetch(API_ENDPOINT, {
                 method: 'POST',
@@ -101,163 +108,150 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (!response.ok) throw new Error('API request failed');
 
             const responseData = await response.json();
-            console.log('Location and address stored successfully:', responseData);
+            console.log('Check-in data sent successfully:', responseData);
 
-            // Display Google Maps link
-            const mapsLinkUrl = responseData.mapsLink;
-            if (mapsLinkUrl) {
+            // Update maps link if provided
+            if (responseData.mapsLink) {
                 mapsLink.textContent = 'View on Google Maps';
-                mapsLink.href = mapsLinkUrl;
+                mapsLink.href = responseData.mapsLink;
+                mapsLink.classList.remove('hidden');
             }
+
+            return true;
+        } catch (error) {
+            console.error("Error sending check-in data:", error);
+            alert(error.message || "Unable to process check-in");
+            return false;
+        }
+    }
+
+    // Get Current Location with API Integration
+    getLocationBtn.addEventListener('click', async function () {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
+
+        try {
+            const position = await getCurrentPosition();
+
+            const latitude = position.coords.latitude.toFixed(6);
+            const longitude = position.coords.longitude.toFixed(6);
+            const coords = `${latitude},${longitude}`;
+            
+            // Update display
+            coordinatesDisplay.textContent = coords;
+
+            // Reverse geocode to get the address
+            const address = await getAddressFromCoordinates(latitude, longitude);
+            addressDisplay.textContent = address;
+
+            // Store location data for later use
+            currentLocation = {
+                latitude,
+                longitude,
+                address
+            };
+
+            // Update Google Maps link
+            mapsLink.href = `https://www.google.com/maps?q=${coords}`;
+            mapsLink.classList.remove('hidden');
 
         } catch (error) {
             console.error("Error:", error);
-            alert(error.message || "Unable to process location");
+            alert(error.message || "Unable to get location");
         } finally {
             getLocationBtn.disabled = false;
             getLocationBtn.innerHTML = 'Get Current Location';
         }
     });
 
+    // Check-In Button
+    checkInBtn.addEventListener('click', async function() {
+        this.disabled = true;
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        try {
+            const success = await sendCheckInData();
+            if (success) {
+                alert('Check-in successful!');
+                
+                // Clear form inputs
+                commentsInput.value = '';
+                withWhomInput.value = 'None';
+                currentPlaceInput.value = '';
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        } finally {
+            this.disabled = false;
+            this.innerHTML = originalText;
+        }
+    });
+
     // SOS Button Functionality
-    if (sosButton) {
-        sosButton.addEventListener('click', async function () {
-            this.disabled = true;
-            const originalText = this.textContent;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    sosButton.addEventListener('click', async function () {
+        this.disabled = true;
+        const originalText = this.textContent;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
-                    });
-                });
-
+        try {
+            // If we don't have location yet, get it first
+            if (!currentLocation.latitude || !currentLocation.longitude) {
+                const position = await getCurrentPosition();
+                
                 const latitude = position.coords.latitude.toFixed(6);
                 const longitude = position.coords.longitude.toFixed(6);
                 const coords = `${latitude},${longitude}`;
+                
+                // Update display
                 coordinatesDisplay.textContent = coords;
 
                 // Reverse geocode to get the address
                 const address = await getAddressFromCoordinates(latitude, longitude);
-
-                // Display the address
                 addressDisplay.textContent = address;
 
-                // Send location, address, and name to your API
-                const payload = {
-                    id: idToken,
-                    latitude: latitude,
-                    longitude: longitude,
-                    address: address,
-                    name: userName,
-                    emergency: true // Add this flag to indicate emergency
+                // Store location data
+                currentLocation = {
+                    latitude,
+                    longitude,
+                    address
                 };
-                console.log('Emergency payload being sent to API:', payload);
 
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error('API request failed');
-
-                const responseData = await response.json();
-                console.log('Emergency location sent successfully:', responseData);
-
-                // Display Google Maps link
-                const mapsLinkUrl = responseData.mapsLink;
-                if (mapsLinkUrl) {
-                    mapsLink.textContent = 'View on Google Maps';
-                    mapsLink.href = mapsLinkUrl;
-                }
-
-                // First show the success alert
-                alert('Emergency signal sent successfully.');
-
-                // Then show the emergency form for additional details
-                document.getElementById('emergencyForm').classList.remove('hidden');
-
-            } catch (error) {
-                console.error("Error:", error);
-                alert(error.message || "Unable to send emergency signal");
-            } finally {
-                // Re-enable the button and restore original text
-                this.disabled = false;
-                this.textContent = originalText;
+                // Update Google Maps link
+                mapsLink.href = `https://www.google.com/maps?q=${coords}`;
+                mapsLink.classList.remove('hidden');
             }
-        });
-    }
 
-    // Emergency form event listeners
-    document.getElementById('submitEmergencyDetails')?.addEventListener('click', async function () {
-        const emergencyDetails = document.getElementById('emergencyDetails').value;
+            // Show emergency form to collect details
+            emergencyForm.classList.remove('hidden');
 
-        // Send the additional details to your API
-        try {
-            const additionalPayload = {
-                id: idToken,
-                emergencyDetails: emergencyDetails,
-                coordinates: coordinatesDisplay.textContent,
-                address: addressDisplay.textContent
-            };
-
-            const response = await fetch(`${API_ENDPOINT}/emergency-details`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
-                },
-                body: JSON.stringify(additionalPayload)
-            });
-
-            if (!response.ok) throw new Error('Failed to send emergency details');
-
-            alert('Emergency details submitted successfully.');
-            document.getElementById('emergencyForm').classList.add('hidden');
         } catch (error) {
-            console.error('Error sending emergency details:', error);
-            alert('Emergency signal was sent, but we could not submit additional details.');
-            document.getElementById('emergencyForm').classList.add('hidden');
+            console.error("Error:", error);
+            alert(error.message || "Unable to send emergency signal");
+        } finally {
+            this.disabled = false;
+            this.textContent = originalText;
         }
     });
 
-    document.getElementById('skipEmergencyDetails')?.addEventListener('click', function () {
-        alert('Emergency signal sent successfully.');
-        document.getElementById('emergencyForm').classList.add('hidden');
+    // Emergency form event listeners
+    submitEmergencyDetails.addEventListener('click', async function () {
+        const detailsText = emergencyDetails.value;
+        emergencyForm.classList.add('hidden');
+        
+        const success = await sendCheckInData(true, detailsText);
+        if (success) {
+            alert('Emergency signal sent successfully with details.');
+        }
     });
 
-    // Additional Details Edit Mode Toggle
-    editDetailsBtn.addEventListener('click', async function () {
-        viewMode.classList.add('hidden');
-        editMode.classList.remove('hidden');
-
-        //populate dropdown on edit
-        await populateStudentDropdown(idToken);
-        document.getElementById('currentPlaceInput').value = document.getElementById('currentPlaceText').textContent;
-        document.getElementById('commentsInput').value = document.getElementById('commentsText').textContent;
-    });
-
-    // Save Details
-    saveDetailsBtn.addEventListener('click', function () {
-        document.getElementById('withWhomText').textContent = document.getElementById('withWhomInput').value;
-        document.getElementById('currentPlaceText').textContent = document.getElementById('currentPlaceInput').value;
-        document.getElementById('commentsText').textContent = document.getElementById('commentsInput').value;
-
-        viewMode.classList.remove('hidden');
-        editMode.classList.add('hidden');
-    });
-
-    // Cancel Edit
-    cancelEditBtn.addEventListener('click', function () {
-        viewMode.classList.remove('hidden');
-        editMode.classList.add('hidden');
+    skipEmergencyDetails.addEventListener('click', async function () {
+        emergencyForm.classList.add('hidden');
+        
+        const success = await sendCheckInData(true, '');
+        if (success) {
+            alert('Emergency signal sent successfully.');
+        }
     });
 
     // Copy Functionality
@@ -306,17 +300,23 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Textarea Auto-resize
-    if (textarea) {
-        textarea.addEventListener('input', function () {
+    if (commentsInput) {
+        commentsInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = `${this.scrollHeight}px`;
+        });
+    }
+
+    if (emergencyDetails) {
+        emergencyDetails.addEventListener('input', function () {
             this.style.height = 'auto';
             this.style.height = `${this.scrollHeight}px`;
         });
     }
 
     // Populate student dropdown
-    async function populateStudentDropdown(idToken) {
-        const studentDropdown = document.getElementById("withWhomInput");
-        const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students"; // Replace with your API endpoint
+    async function populateStudentDropdown() {
+        const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students";
 
         try {
             const response = await fetch(apiUrl, {
@@ -330,15 +330,23 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
             const students = await response.json();
 
-            studentDropdown.innerHTML = ""; // Clear existing options
+            // Keep the "None" option
+            const noneOption = withWhomInput.querySelector('option[value="None"]');
+            withWhomInput.innerHTML = "";
+            withWhomInput.appendChild(noneOption);
+            
+            // Add student options
             students.forEach(student => {
                 const option = document.createElement("option");
                 option.value = student.name;
                 option.textContent = student.name;
-                studentDropdown.appendChild(option);
+                withWhomInput.appendChild(option);
             });
         } catch (error) {
             console.error("Error loading students:", error);
         }
     }
+
+    // Initialize data
+    populateStudentDropdown();
 });

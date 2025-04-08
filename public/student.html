@@ -55,87 +55,56 @@
                 </div>
             </div>
 
-            <!-- Current Location Card -->
+            <!-- Merged Location & Details Card -->
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-map-marker-alt"></i> Current Location</h2>
-                    <button id="getLocation" class="location-btn">Get Current Location</button>
+                    <h2><i class="fas fa-map-marker-alt"></i> Check-In</h2>
                 </div>
                 <div class="card-content">
+                    <!-- Location Info -->
                     <div class="location-info">
-                        <h3>Location Coordinates</h3>
+                        <h3>Current Location</h3>
                         <div class="coordinates">
                             <span id="coordinates">N/A</span>
                             <button class="copy-btn" title="Copy coordinates">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
+                        <button id="getLocation" class="location-btn">Get Current Location</button>
                         <h3>Address:</h3>
-                        <p id="addressDisplay">N/A</p> <!-- Added for address display -->
+                        <p id="addressDisplay">N/A</p>
                         <a href="#" target="_blank" id="mapsLink" class="maps-link">Open in Google Maps</a>
                     </div>
-                </div>
-            </div>
 
-            <!-- Additional Details Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2><i class="fas fa-info-circle"></i> Additional Details</h2>
-                    <button id="editDetails" class="edit-btn">
-                        <i class="fas fa-edit"></i> Update Details
-                    </button>
-                </div>
-                <div class="card-content">
-                    <div class="details-container">
-                        <!-- View Mode -->
-                        <div id="viewMode" class="details-view">
-                            <div class="detail-item">
-                                <label>My Peers</label>
-                                <p id="withWhomText">My Peers</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Current Place</label>
-                                <p id="currentPlaceText">123 Main St, College Station, TX 77840</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Additional Comments</label>
-                                <p id="commentsText">No additional comments</p>
-                            </div>
+                    <!-- Check-in Details Form -->
+                    <div class="check-in-form">
+                        <h3>Check-In Details</h3>
+                        <div class="form-group">
+                            <label for="withWhomInput">My Peers</label>
+                            <select id="withWhomInput" class="dropdown-select">
+                                <option value="None">None</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
                         </div>
-
-                        <!-- Edit Mode (initially hidden) -->
-                        <div id="editMode" class="details-edit hidden">
-
-                            <!-- code for with whom-->
-                            <div class="detail-item">
-                                <label>My Peers</label>
-                                <select id="withWhomInput" class="dropdown-select">
-                                    <!-- Options will be populated by JavaScript -->
-                                </select>
-                            </div>
-                            <div class="detail-item">
-                                <label>Current Place</label>
-                                <input type="text" id="currentPlaceInput"
-                                    value="123 Main St, College Station, TX 77840">
-                            </div>
-                            <div class="detail-item">
-                                <label>Additional Comments</label>
-                                <textarea id="commentsInput" placeholder="Add your comments here..."></textarea>
-                            </div>
-                            <div class="edit-actions">
-                                <button id="saveDetails" class="save-btn">Save Changes</button>
-                                <button id="cancelEdit" class="cancel-btn">Cancel</button>
-                            </div>
+                        <div class="form-group">
+                            <label for="currentPlaceInput">Current Place</label>
+                            <input type="text" id="currentPlaceInput" placeholder="e.g. Library, Cafeteria">
                         </div>
+                        <div class="form-group">
+                            <label for="commentsInput">Additional Comments</label>
+                            <textarea id="commentsInput" placeholder="Add any additional information here..."></textarea>
+                        </div>
+                        <button id="checkInBtn" class="primary-btn">
+                            <i class="fas fa-check-circle"></i> Check In
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- SOS Button -->
-        <button class="sos-button">SOS</button>
-        <!-- SOS Button -->
         <button id="sosButton" class="sos-button">SOS</button>
+        
         <!-- Emergency Details Form (initially hidden) -->
         <div id="emergencyForm" class="emergency-form hidden">
             <div class="emergency-form-content">
@@ -148,8 +117,9 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <script type="module" src="js/student.js"></script>
+    <script type="module" src="js/student.js"></script>
 </body>
 
 </html>

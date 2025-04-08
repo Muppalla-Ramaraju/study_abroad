@@ -173,31 +173,54 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const response = await fetch(
                     'https://s4rruk7vn6.execute-api.us-east-1.amazonaws.com/prod/LocationFaculty'
                 );
+
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-                const studentDetails = await response.json();
+                const rawData = await response.json();
+                console.log("Raw API Response:", rawData);
+
+                // Parse body if it's a stringified JSON array
+                let studentDetails;
+                try {
+                    studentDetails =
+                        typeof rawData.body === "string"
+                            ? JSON.parse(rawData.body)
+                            : rawData.body || rawData;
+                } catch (err) {
+                    throw new Error("Failed to parse API response");
+                }
+
+                if (!Array.isArray(studentDetails)) throw new Error("Invalid data format");
+
                 displayStudentDetails(studentDetails);
+                
             } catch (error) {
                 console.error(error);
                 studentDetailsContainer.innerHTML =
-                    '<p>Error fetching student details. Please try again later.</p>';
+                    '<p class="error-message">Error loading student data. Please try again later.</p>';
             }
         });
     }
 
     function displayStudentDetails(details) {
+        if (!Array.isArray(details) || details.length === 0) {
+            studentDetailsContainer.innerHTML =
+                '<p class="no-data">No student check-ins found.</p>';
+            return;
+        }
+
         studentDetailsContainer.innerHTML =
             '<table class="student-details-table"><thead><tr><th>Name</th><th>Address</th><th>Date</th><th>Time</th><th>Latitude</th><th>Longitude</th><th>Maps Link</th></tr></thead><tbody>' +
-            details
-                .map(
-                    student =>
-                        `<tr><td>${student.name}</td><td>${student.address}</td><td>${student.date}</td><td>${student.time}</td><td>${student.latitude.toFixed(
-                            6
-                        )}</td><td>${student.longitude.toFixed(
-                            6
-                        )}</td><td><a href="${student.mapsLink}" target="_blank">View on Map</a></td></tr>`
-                )
-                .join('') +
+            details.map(student => `
+                    <tr>
+                        <td>${student.name || "N/A"}</td>
+                        <td>${student.address || "N/A"}</td>
+                        <td>${student.date || "N/A"}</td>
+                        <td>${student.time || "N/A"}</td>
+                        <td>${student.latitude?.toFixed(6)}</td>
+                        <td>${student.longitude?.toFixed(6)}</td>
+                        <td><a href="${student.mapsLink}" target="_blank">View Map</a></td>
+                    </tr>`).join("") +
             '</tbody></table>';
     }
 });
