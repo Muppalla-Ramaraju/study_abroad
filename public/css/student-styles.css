@@ -435,3 +435,38 @@ h1 {
     border-color: var(--tamu-maroon);
     box-shadow: 0 0 0 2px rgba(80, 0, 0, 0.1);
 }
+
+/* Updated Dropdown Styles for Multi-select */
+.dropdown-select[multiple] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    background-color: var(--white);
+    cursor: pointer;
+    overflow-y: auto;
+}
+
+.dropdown-select[multiple] option {
+    padding: 8px;
+    margin: 2px 0;
+    border-radius: 3px;
+}
+
+.dropdown-select[multiple] option:checked {
+    background-color: var(--tamu-maroon);
+    color: var(--white);
+}
+
+.dropdown-select[multiple] option:hover {
+    background-color: var(--gray-200);
+}
+
+/* Helper text styling */
+.helper-text {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    margin-top: 5px;
+    font-style: italic;
+}

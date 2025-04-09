@@ -2,7 +2,7 @@ import { getSession, refreshTokens, logout, initSessionChecker } from './session
 
 document.addEventListener('DOMContentLoaded', async function () {
     // Get session data
-    const { idToken, userRole, tokenExpiresAt } = getSession();
+    const { idToken, userRole, tokenExpiresAt, name } = getSession();
 
     // Check if session is expired or invalid
     if (!idToken || userRole !== 'student') {
@@ -67,13 +67,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, {
                 enableHighAccuracy: true,
-                timeout: 5000,
+                timeout: 10000,
                 maximumAge: 0
             });
         });
     }
 
     // Function to send check-in data
+    // Modify the sendCheckInData function to handle multiple peers
     async function sendCheckInData(isEmergency = false, emergencyMessage = '') {
         if (!currentLocation.latitude || !currentLocation.longitude) {
             alert('Please get your current location first.');
@@ -81,13 +82,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
 
         try {
+            // Get selected peers
+            const selectedPeers = Array.from(withWhomInput.selectedOptions)
+                .map(option => option.value)
+                .filter(value => value !== "None")
+                .join(", ");
+
             const payload = {
                 id: idToken,
                 latitude: currentLocation.latitude,
                 longitude: currentLocation.longitude,
                 address: currentLocation.address,
                 name: userName,
-                peers: withWhomInput.value,
+                peers: selectedPeers || 'None', // Use selected peers or 'None' if empty
                 place: currentPlaceInput.value,
                 comments: commentsInput.value,
                 emergency: isEmergency,
@@ -316,36 +323,71 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Populate student dropdown
     async function populateStudentDropdown() {
-        const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/students";
-
+        // Get the current user's name from localStorage
+        const currentUserName = localStorage.getItem('name');
+        if (!currentUserName) {
+            console.error("User name not found in session");
+            return;
+        }
+    
+        const apiUrl = "https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/studentsinsideclass";
+    
         try {
             const response = await fetch(apiUrl, {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${idToken}`,
                     'Content-Type': 'application/json'
                 },
+                body: JSON.stringify({
+                    userName: currentUserName
+                })
             });
+            
             if (!response.ok) {
                 throw new Error("Failed to fetch student data");
             }
+            
             const students = await response.json();
-
-            // Keep the "None" option
-            const noneOption = withWhomInput.querySelector('option[value="None"]');
+    
+            // Convert the single select to a multi-select
+            // First, update the HTML element to allow multiple selection
+            withWhomInput.setAttribute('multiple', 'true');
+            withWhomInput.size = Math.min(5, students.length + 1); // Show up to 5 options at once
+            
+            // Clear existing options
             withWhomInput.innerHTML = "";
+            
+            // Add a "None" option
+            const noneOption = document.createElement("option");
+            noneOption.value = "None";
+            noneOption.textContent = "None";
             withWhomInput.appendChild(noneOption);
             
-            // Add student options
+            // Add student options (excluding current user)
             students.forEach(student => {
-                const option = document.createElement("option");
-                option.value = student.name;
-                option.textContent = student.name;
-                withWhomInput.appendChild(option);
+                // Skip the current user
+                if (student.name !== currentUserName) {
+                    const option = document.createElement("option");
+                    option.value = student.name;
+                    option.textContent = student.name;
+                    withWhomInput.appendChild(option);
+                }
             });
+    
+            // Add helper text
+            const helperText = document.createElement("p");
+            helperText.textContent = "Hold Ctrl/Cmd to select multiple students";
+            helperText.style.fontSize = "0.8rem";
+            helperText.style.color = "#666";
+            helperText.style.marginTop = "5px";
+            withWhomInput.parentNode.appendChild(helperText);
+            
         } catch (error) {
             console.error("Error loading students:", error);
         }
     }
+
 
     // Initialize data
     populateStudentDropdown();
