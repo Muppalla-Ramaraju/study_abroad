@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize session checker
     initSessionChecker();
 
+    
     // DOM Elements
     let getLocationBtn = document.getElementById('getLocation');
     let coordinatesDisplay = document.getElementById('coordinates');
