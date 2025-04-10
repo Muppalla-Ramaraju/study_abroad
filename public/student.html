@@ -21,11 +21,9 @@
             </div>
 
             <nav class="nav-menu">
-                <button><i class="fas fa-user"></i> Profile</button>
-                <button><i class="fas fa-bell"></i> Notifications</button>
-                <button><i class="fas fa-shield-alt"></i> Sign-in & Security</button>
-                <button><i class="fas fa-question-circle"></i> Help</button>
-                <button><i class="fas fa-cog"></i> Account Settings</button>
+                <button data-page="profile"><i class="fas fa-user"></i> Profile</button>
+                <button data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+                <button data-page="help"><i class="fas fa-question-circle"></i> Help</button>
             </nav>
 
             <!-- Logout Button -->
@@ -60,7 +58,7 @@
                 <div class="card-header">
                     <h2><i class="fas fa-map-marker-alt"></i> Check-In</h2>
                 </div>
-                <div class="card-content">
+                <div class="card-content check-in-content">
                     <!-- Location Info -->
                     <div class="location-info">
                         <h3>Current Location</h3>
@@ -70,7 +68,7 @@
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
-                        <button id="getLocation" class="location-btn">Get Current Location</button>
+                        <button id="getLocation" class="primary-btn">Get Current Location</button>
                         <h3>Address:</h3>
                         <p id="addressDisplay">N/A</p>
                         <a href="#" target="_blank" id="mapsLink" class="maps-link">Open in Google Maps</a>
@@ -120,6 +118,6 @@
     </div>
 
     <script type="module" src="js/student.js"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92dd55fe2b582733',t:'MTc0NDIzNjY0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>

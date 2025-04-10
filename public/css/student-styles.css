@@ -82,6 +82,10 @@ body {
     width: 20px;
 }
 
+.nav-menu button.active {
+    background-color: var(--tamu-maroon-dark);
+}
+
 /* Logout Button */
 .logout-btn {
     margin-top: auto;
@@ -109,9 +113,7 @@ body {
     flex: 1;
     padding: 2rem;
     margin-left: 250px;
-    /* Remove this line or set it to 0 */
     margin-right: 0;
-    /* Changed from 250px to 0 */
 }
 
 h1 {
@@ -163,18 +165,66 @@ h1 {
     color: #dc2626;
 }
 
-/* Location Styles */
-.location-btn {
+/* Check-in Styles */
+.check-in-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.location-info, .check-in-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Increased gap for better spacing */
+}
+
+.check-in-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Consistent gap between label and input */
+}
+
+.check-in-form label {
+    font-weight: 500;
+    color: var(--gray-600);
+    font-size: 0.95rem; /* Slightly larger font for readability */
+}
+
+.check-in-form input,
+.check-in-form textarea,
+.check-in-form select {
+    padding: 0.75rem; /* Increased padding for better appearance */
+    border: 1px solid var(--gray-300);
+    border-radius: 0.25rem;
+    font-size: 0.95rem; /* Consistent font size */
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.check-in-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.check-in-form .helper-text {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    font-style: italic;
+}
+
+.location-btn, .primary-btn {
     background-color: var(--tamu-maroon);
     color: var(--white);
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.5rem; /* Increased padding for better look */
     border-radius: 0.25rem;
     cursor: pointer;
     transition: background-color 0.2s;
+    width: fit-content; /* Adjust width to content */
 }
 
-.location-btn:hover {
+.location-btn:hover, .primary-btn:hover {
     background-color: var(--tamu-maroon-dark);
 }
 
@@ -305,13 +355,11 @@ h1 {
     background-color: var(--gray-100);
 }
 
-
 /* Success Animation */
 @keyframes fadeOut {
     from {
         opacity: 1;
     }
-
     to {
         opacity: 0;
     }
@@ -324,15 +372,13 @@ h1 {
 
 /* SOS Button Styles */
 .sos-button {
-    position: fixed;
+    position: absolute; /* Changed from fixed to absolute */
     top: 20px;
     right: 20px;
-    background-color: #dc2626;
-    /* Red color */
+    background-color: var(--tamu-maroon);
     color: var(--white);
     border: none;
     border-radius: 50%;
-    /* Makes it circular */
     width: 60px;
     height: 60px;
     font-weight: bold;
@@ -340,33 +386,14 @@ h1 {
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    /* Ensures it's above other elements */
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
 }
 
-/* SOS Button Styles - Simplified */
-.sos-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: #dc2626;
-    /* Red color */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 20px;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
 .sos-button:hover {
-    background-color: #b91c1c;
-    /* Darker red on hover */
+    background-color: var(--tamu-maroon-dark);
 }
 
 /* Emergency Form Styles */
@@ -422,10 +449,10 @@ h1 {
 /* Dropdown Styles */
 .dropdown-select {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem; /* Increased padding for better look */
     border: 1px solid var(--gray-300);
     border-radius: 0.25rem;
-    font-size: 0.9rem;
+    font-size: 0.95rem; /* Consistent font size */
     background-color: var(--white);
     cursor: pointer;
 }
@@ -439,17 +466,18 @@ h1 {
 /* Updated Dropdown Styles for Multi-select */
 .dropdown-select[multiple] {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border: 1px solid var(--gray-300);
     border-radius: 0.25rem;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     background-color: var(--white);
     cursor: pointer;
     overflow-y: auto;
+    height: auto; /* Allow dynamic height */
 }
 
 .dropdown-select[multiple] option {
-    padding: 8px;
+    padding: 0.5rem; /* Adjusted padding for options */
     margin: 2px 0;
     border-radius: 3px;
 }
@@ -465,8 +493,8 @@ h1 {
 
 /* Helper text styling */
 .helper-text {
+    margin-top: 0.5rem;
     font-size: 0.8rem;
     color: var(--gray-600);
-    margin-top: 5px;
     font-style: italic;
 }

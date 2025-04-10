@@ -14,21 +14,21 @@ document.addEventListener('DOMContentLoaded', async function () {
     initSessionChecker();
 
     // DOM Elements
-    const getLocationBtn = document.getElementById('getLocation');
-    const coordinatesDisplay = document.getElementById('coordinates');
-    const addressDisplay = document.getElementById('addressDisplay');
-    const withWhomInput = document.getElementById('withWhomInput');
-    const currentPlaceInput = document.getElementById('currentPlaceInput');
-    const commentsInput = document.getElementById('commentsInput');
-    const checkInBtn = document.getElementById('checkInBtn');
-    const mapsLink = document.getElementById('mapsLink');
+    let getLocationBtn = document.getElementById('getLocation');
+    let coordinatesDisplay = document.getElementById('coordinates');
+    let addressDisplay = document.getElementById('addressDisplay');
+    let withWhomInput = document.getElementById('withWhomInput');
+    let currentPlaceInput = document.getElementById('currentPlaceInput');
+    let commentsInput = document.getElementById('commentsInput');
+    let checkInBtn = document.getElementById('checkInBtn');
+    let mapsLink = document.getElementById('mapsLink');
     const navButtons = document.querySelectorAll('.nav-menu button');
     const logoutBtn = document.querySelector('.logout-btn');
-    const sosButton = document.getElementById('sosButton');
-    const emergencyForm = document.getElementById('emergencyForm');
-    const emergencyDetails = document.getElementById('emergencyDetails');
-    const submitEmergencyDetails = document.getElementById('submitEmergencyDetails');
-    const skipEmergencyDetails = document.getElementById('skipEmergencyDetails');
+    let sosButton = document.getElementById('sosButton');
+    let emergencyForm = document.getElementById('emergencyForm');
+    let emergencyDetails = document.getElementById('emergencyDetails');
+    let submitEmergencyDetails = document.getElementById('submitEmergencyDetails');
+    let skipEmergencyDetails = document.getElementById('skipEmergencyDetails');
 
     // API Configuration
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         address: null
     };
 
+    // Create a template for dashboard content
+    const dashboardTemplate = document.querySelector('.main-content').cloneNode(true);
+    let currentPage = 'dashboard'; // Track current page
+
     // Function to get address from coordinates using Geoapify Reverse Geocoding API
     async function getAddressFromCoordinates(lat, lon) {
         const reverseGeocodingUrl = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${GEOAPIFY_API_KEY}`;
@@ -52,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (!response.ok) throw new Error('Failed to fetch address');
             const data = await response.json();
             if (data.features && data.features.length > 0) {
-                return data.features[0].properties.formatted; // Full formatted address
+                return data.features[0].properties.formatted;
             } else {
                 throw new Error('No address found');
             }
@@ -74,7 +78,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Function to send check-in data
-    // Modify the sendCheckInData function to handle multiple peers
     async function sendCheckInData(isEmergency = false, emergencyMessage = '') {
         if (!currentLocation.latitude || !currentLocation.longitude) {
             alert('Please get your current location first.');
@@ -82,7 +85,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
 
         try {
-            // Get selected peers
             const selectedPeers = Array.from(withWhomInput.selectedOptions)
                 .map(option => option.value)
                 .filter(value => value !== "None")
@@ -94,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 longitude: currentLocation.longitude,
                 address: currentLocation.address,
                 name: userName,
-                peers: selectedPeers || 'None', // Use selected peers or 'None' if empty
+                peers: selectedPeers || 'None',
                 place: currentPlaceInput.value,
                 comments: commentsInput.value,
                 emergency: isEmergency,
@@ -117,7 +119,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             const responseData = await response.json();
             console.log('Check-in data sent successfully:', responseData);
 
-            // Update maps link if provided
             if (responseData.mapsLink) {
                 mapsLink.textContent = 'View on Google Maps';
                 mapsLink.href = responseData.mapsLink;
@@ -132,198 +133,166 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Get Current Location with API Integration
-    getLocationBtn.addEventListener('click', async function () {
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
+    // Initialize event listeners
+    function initializeEventListeners() {
+        getLocationBtn.addEventListener('click', async function () {
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
 
-        try {
-            const position = await getCurrentPosition();
-
-            const latitude = position.coords.latitude.toFixed(6);
-            const longitude = position.coords.longitude.toFixed(6);
-            const coords = `${latitude},${longitude}`;
-            
-            // Update display
-            coordinatesDisplay.textContent = coords;
-
-            // Reverse geocode to get the address
-            const address = await getAddressFromCoordinates(latitude, longitude);
-            addressDisplay.textContent = address;
-
-            // Store location data for later use
-            currentLocation = {
-                latitude,
-                longitude,
-                address
-            };
-
-            // Update Google Maps link
-            mapsLink.href = `https://www.google.com/maps?q=${coords}`;
-            mapsLink.classList.remove('hidden');
-
-        } catch (error) {
-            console.error("Error:", error);
-            alert(error.message || "Unable to get location");
-        } finally {
-            getLocationBtn.disabled = false;
-            getLocationBtn.innerHTML = 'Get Current Location';
-        }
-    });
-
-    // Check-In Button
-    checkInBtn.addEventListener('click', async function() {
-        this.disabled = true;
-        const originalText = this.innerHTML;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-
-        try {
-            const success = await sendCheckInData();
-            if (success) {
-                alert('Check-in successful!');
-                
-                // Clear form inputs
-                commentsInput.value = '';
-                withWhomInput.value = 'None';
-                currentPlaceInput.value = '';
-            }
-        } catch (error) {
-            console.error("Error:", error);
-        } finally {
-            this.disabled = false;
-            this.innerHTML = originalText;
-        }
-    });
-
-    // SOS Button Functionality
-    sosButton.addEventListener('click', async function () {
-        this.disabled = true;
-        const originalText = this.textContent;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-        try {
-            // If we don't have location yet, get it first
-            if (!currentLocation.latitude || !currentLocation.longitude) {
+            try {
                 const position = await getCurrentPosition();
-                
+
                 const latitude = position.coords.latitude.toFixed(6);
                 const longitude = position.coords.longitude.toFixed(6);
                 const coords = `${latitude},${longitude}`;
                 
-                // Update display
                 coordinatesDisplay.textContent = coords;
 
-                // Reverse geocode to get the address
                 const address = await getAddressFromCoordinates(latitude, longitude);
                 addressDisplay.textContent = address;
 
-                // Store location data
                 currentLocation = {
                     latitude,
                     longitude,
                     address
                 };
 
-                // Update Google Maps link
                 mapsLink.href = `https://www.google.com/maps?q=${coords}`;
                 mapsLink.classList.remove('hidden');
-            }
 
-            // Show emergency form to collect details
-            emergencyForm.classList.remove('hidden');
-
-        } catch (error) {
-            console.error("Error:", error);
-            alert(error.message || "Unable to send emergency signal");
-        } finally {
-            this.disabled = false;
-            this.textContent = originalText;
-        }
-    });
-
-    // Emergency form event listeners
-    submitEmergencyDetails.addEventListener('click', async function () {
-        const detailsText = emergencyDetails.value;
-        emergencyForm.classList.add('hidden');
-        
-        const success = await sendCheckInData(true, detailsText);
-        if (success) {
-            alert('Emergency signal sent successfully with details.');
-        }
-    });
-
-    skipEmergencyDetails.addEventListener('click', async function () {
-        emergencyForm.classList.add('hidden');
-        
-        const success = await sendCheckInData(true, '');
-        if (success) {
-            alert('Emergency signal sent successfully.');
-        }
-    });
-
-    // Copy Functionality
-    document.querySelectorAll('.copy-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const textToCopy = this.previousElementSibling?.textContent || '';
-            if (textToCopy) {
-                navigator.clipboard.writeText(textToCopy)
-                    .then(() => {
-                        const icon = this.querySelector('i');
-                        icon.className = 'fas fa-check copy-success';
-                        setTimeout(() => {
-                            icon.className = 'fas fa-copy';
-                        }, 1000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy text:', err);
-                        alert('Failed to copy text to clipboard');
-                    });
+            } catch (error) {
+                console.error("Error:", error);
+                alert(error.message || "Unable to get location");
+            } finally {
+                getLocationBtn.disabled = false;
+                getLocationBtn.innerHTML = 'Get Current Location';
             }
         });
-    });
 
-    // Google Maps Link
-    mapsLink.addEventListener('click', function (e) {
-        e.preventDefault();
-        const coordinates = coordinatesDisplay.textContent;
-        if (coordinates) {
-            window.open(`https://www.google.com/maps?q=${coordinates}`, '_blank');
+        checkInBtn.addEventListener('click', async function() {
+            this.disabled = true;
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            try {
+                const success = await sendCheckInData();
+                if (success) {
+                    alert('Check-in successful!');
+                    commentsInput.value = '';
+                    withWhomInput.value = 'None';
+                    currentPlaceInput.value = '';
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            } finally {
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+
+        sosButton.addEventListener('click', async function () {
+            this.disabled = true;
+            const originalText = this.textContent;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            try {
+                if (!currentLocation.latitude || !currentLocation.longitude) {
+                    const position = await getCurrentPosition();
+                    
+                    const latitude = position.coords.latitude.toFixed(6);
+                    const longitude = position.coords.longitude.toFixed(6);
+                    const coords = `${latitude},${longitude}`;
+                    
+                    coordinatesDisplay.textContent = coords;
+
+                    const address = await getAddressFromCoordinates(latitude, longitude);
+                    addressDisplay.textContent = address;
+
+                    currentLocation = {
+                        latitude,
+                        longitude,
+                        address
+                    };
+
+                    mapsLink.href = `https://www.google.com/maps?q=${coords}`;
+                    mapsLink.classList.remove('hidden');
+                }
+
+                emergencyForm.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert(error.message || "Unable to send emergency signal");
+            } finally {
+                this.disabled = false;
+                this.textContent = originalText;
+            }
+        });
+
+        submitEmergencyDetails.addEventListener('click', async function () {
+            const detailsText = emergencyDetails.value;
+            emergencyForm.classList.add('hidden');
+            
+            const success = await sendCheckInData(true, detailsText);
+            if (success) {
+                alert('Emergency signal sent successfully with details.');
+            }
+        });
+
+        skipEmergencyDetails.addEventListener('click', async function () {
+            emergencyForm.classList.add('hidden');
+            
+            const success = await sendCheckInData(true, '');
+            if (success) {
+                alert('Emergency signal sent successfully.');
+            }
+        });
+
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const textToCopy = this.previousElementSibling?.textContent || '';
+                if (textToCopy) {
+                    navigator.clipboard.writeText(textToCopy)
+                        .then(() => {
+                            const icon = this.querySelector('i');
+                            icon.className = 'fas fa-check copy-success';
+                            setTimeout(() => {
+                                icon.className = 'fas fa-copy';
+                            }, 1000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy text:', err);
+                            alert('Failed to copy text to clipboard');
+                        });
+                }
+            });
+        });
+
+        mapsLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            const coordinates = coordinatesDisplay.textContent;
+            if (coordinates) {
+                window.open(`https://www.google.com/maps?q=${coordinates}`, '_blank');
+            }
+        });
+
+        if (commentsInput) {
+            commentsInput.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = `${this.scrollHeight}px`;
+            });
         }
-    });
 
-    // Navigation Buttons
-    navButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-
-    // Logout Button
-    logoutBtn.addEventListener('click', function () {
-        if (confirm('Are you sure you want to log out?')) {
-            logout();
+        if (emergencyDetails) {
+            emergencyDetails.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = `${this.scrollHeight}px`;
+            });
         }
-    });
-
-    // Textarea Auto-resize
-    if (commentsInput) {
-        commentsInput.addEventListener('input', function () {
-            this.style.height = 'auto';
-            this.style.height = `${this.scrollHeight}px`;
-        });
-    }
-
-    if (emergencyDetails) {
-        emergencyDetails.addEventListener('input', function () {
-            this.style.height = 'auto';
-            this.style.height = `${this.scrollHeight}px`;
-        });
     }
 
     // Populate student dropdown
     async function populateStudentDropdown() {
-        // Get the current user's name from localStorage
         const currentUserName = localStorage.getItem('name');
         if (!currentUserName) {
             console.error("User name not found in session");
@@ -350,23 +319,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             
             const students = await response.json();
     
-            // Convert the single select to a multi-select
-            // First, update the HTML element to allow multiple selection
+            withWhomInput.innerHTML = ""; // Clear existing options
             withWhomInput.setAttribute('multiple', 'true');
-            withWhomInput.size = Math.min(5, students.length + 1); // Show up to 5 options at once
+            withWhomInput.size = Math.min(5, students.length + 1);
             
-            // Clear existing options
-            withWhomInput.innerHTML = "";
-            
-            // Add a "None" option
             const noneOption = document.createElement("option");
             noneOption.value = "None";
             noneOption.textContent = "None";
             withWhomInput.appendChild(noneOption);
             
-            // Add student options (excluding current user)
             students.forEach(student => {
-                // Skip the current user
                 if (student.name !== currentUserName) {
                     const option = document.createElement("option");
                     option.value = student.name;
@@ -375,20 +337,109 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
             });
     
-            // Add helper text
-            const helperText = document.createElement("p");
+            const helperText = document.querySelector('.helper-text') || document.createElement("p");
             helperText.textContent = "Hold Ctrl/Cmd to select multiple students";
-            helperText.style.fontSize = "0.8rem";
-            helperText.style.color = "#666";
-            helperText.style.marginTop = "5px";
-            withWhomInput.parentNode.appendChild(helperText);
+            helperText.className = "helper-text";
+            if (!document.querySelector('.helper-text')) {
+                withWhomInput.parentNode.appendChild(helperText);
+            }
             
         } catch (error) {
             console.error("Error loading students:", error);
         }
     }
 
+    // Navigation Buttons
+    navButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
 
-    // Initialize data
+            const page = this.getAttribute('data-page');
+            const mainContent = document.querySelector('.main-content');
+
+            if (page !== currentPage) {
+                // Save current state before switching
+                const currentState = {
+                    currentPlace: currentPlaceInput.value,
+                    comments: commentsInput.value,
+                    selectedPeers: Array.from(withWhomInput.selectedOptions).map(option => option.value),
+                    coordinates: coordinatesDisplay.textContent,
+                    address: addressDisplay.textContent,
+                    locationFetched: currentLocation.latitude && currentLocation.longitude
+                };
+
+                if (page === 'profile') {
+                    mainContent.innerHTML = '<h1>Profile Page</h1><p>This is the profile section.</p>';
+                } else if (page === 'help') {
+                    mainContent.innerHTML = '<h1>Help Page</h1><p>This is the help section.</p>';
+                } else if (page === 'dashboard') {
+                    // Restore dashboard content
+                    mainContent.innerHTML = dashboardTemplate.innerHTML;
+
+                    // Reinitialize DOM elements
+                    getLocationBtn = document.getElementById('getLocation');
+                    coordinatesDisplay = document.getElementById('coordinates');
+                    addressDisplay = document.getElementById('addressDisplay');
+                    withWhomInput = document.getElementById('withWhomInput');
+                    currentPlaceInput = document.getElementById('currentPlaceInput');
+                    commentsInput = document.getElementById('commentsInput');
+                    checkInBtn = document.getElementById('checkInBtn');
+                    mapsLink = document.getElementById('mapsLink');
+                    sosButton = document.getElementById('sosButton');
+                    emergencyForm = document.getElementById('emergencyForm');
+                    emergencyDetails = document.getElementById('emergencyDetails');
+                    submitEmergencyDetails = document.getElementById('submitEmergencyDetails');
+                    skipEmergencyDetails = document.getElementById('skipEmergencyDetails');
+
+                    // Restore state
+                    currentPlaceInput.value = currentState.currentPlace;
+                    commentsInput.value = currentState.comments;
+                    coordinatesDisplay.textContent = currentState.coordinates;
+                    addressDisplay.textContent = currentState.address;
+                    if (currentState.locationFetched) {
+                        currentLocation = {
+                            latitude: currentLocation.latitude,
+                            longitude: currentLocation.longitude,
+                            address: currentState.address
+                        };
+                        mapsLink.href = `https://www.google.com/maps?q=${currentState.coordinates}`;
+                        mapsLink.classList.remove('hidden');
+                    }
+
+                    // Restore selected peers
+                    withWhomInput.innerHTML = ""; // Clear to avoid duplicates
+                    const noneOption = document.createElement("option");
+                    noneOption.value = "None";
+                    noneOption.textContent = "None";
+                    withWhomInput.appendChild(noneOption);
+                    populateStudentDropdown().then(() => {
+                        currentState.selectedPeers.forEach(peer => {
+                            const options = withWhomInput.options;
+                            for (let i = 0; i < options.length; i++) {
+                                if (options[i].value === peer) {
+                                    options[i].selected = true;
+                                    break;
+                                }
+                            }
+                        });
+                    });
+
+                    initializeEventListeners();
+                }
+                currentPage = page;
+            }
+        });
+    });
+
+    // Initialize data and set default active page
+    initializeEventListeners();
     populateStudentDropdown();
+    document.querySelector('[data-page="dashboard"]').classList.add('active');
+
+    logoutBtn.addEventListener('click', function () {
+        if (confirm('Are you sure you want to log out?')) {
+            logout();
+        }
+    });
 });
