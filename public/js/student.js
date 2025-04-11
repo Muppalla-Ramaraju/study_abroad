@@ -91,6 +91,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .filter(value => value !== "None")
                 .join(", ");
 
+          // ADD the custom status
+            const selectedStatus = customStatusInput.value;
+
             const payload = {
                 id: idToken,
                 latitude: currentLocation.latitude,
@@ -101,7 +104,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 place: currentPlaceInput.value,
                 comments: commentsInput.value,
                 emergency: isEmergency,
-                emergencyDetails: emergencyMessage
+                emergencyDetails: emergencyMessage,
+                studentStatus: selectedStatus // ADD custom status to payload
             };
 
             console.log('Payload being sent to API:', payload);

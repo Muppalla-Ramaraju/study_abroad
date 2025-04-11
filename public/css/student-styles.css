@@ -498,3 +498,20 @@ h1 {
     color: var(--gray-600);
     font-style: italic;
 }
+
+
+/* Add to existing dropdown styles */
+/*.dropdown-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 5px;
+    background-color: white;
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}*/
+
