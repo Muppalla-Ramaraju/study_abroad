@@ -69,32 +69,27 @@
             </div>
             <!-- Divider -->
             <hr class="section-divider">
-            <!-- Current Assignments Section -->
-            <div class="section assignments-section">
-                <h2>Current Assignments: ISTM 631</h2>
+            <!-- Additional Details Section -->
+            <div class="section additional-details-section">
+                <div class="section-header">
+                    <i class="fas fa-info-circle"></i>
+                    <h2>Additional Details</h2>
+                </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>STUDENT NAME</th>
-                                <th>LOCATION</th>
-                                <th>COMPANION</th>
+                                <th>PEERS</th>
+                                <th>PLACE</th>
+                                <th>STATUS</th>
                                 <th>COMMENTS</th>
+                                <th>EMERGENCY</th>
+                                <th>EMERGENCY DETAILS</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>John Doe</td>
-                                <td><a href="https://www.google.com/maps?q=30.6280,-96.3344" target="_blank">30.6280° N, 96.3344° W</a></td>
-                                <td>Jane Smith</td>
-                                <td>Meeting at Starbucks - Century Square</td>
-                            </tr>
-                            <tr>
-                                <td>Alice Johnson</td>
-                                <td><a href="https://www.google.com/maps?q=30.6188,-96.3365" target="_blank">30.6188° N, 96.3365° W</a></td>
-                                <td>Bob Wilson</td>
-                                <td>Research discussion at Sweet Paris</td>
-                            </tr>
+                        <tbody id="additionalDetailsTable">
+                            <!-- Data will be populated by LocationsFaculty Lambda -->
                         </tbody>
                     </table>
                 </div>

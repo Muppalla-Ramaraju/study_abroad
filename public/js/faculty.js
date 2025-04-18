@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const backdrop = document.getElementById('backdrop');
     const getStudentDetailsBtn = document.getElementById('getStudentDetailsBtn');
     const studentDetailsContainer = document.getElementById('studentDetailsContainer');
+    const additionalDetailsTable = document.getElementById('additionalDetailsTable');
 
     // Navigation Menu Active State
     navItems.forEach(item => {
@@ -74,43 +75,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-    // Course Card Click Handler
-    const courseCards = document.querySelectorAll('.course-card');
-    courseCards.forEach(card => {
-        card.addEventListener('click', function () {
-            const courseCode = this.querySelector('h3').textContent;
-            loadCourseDetails(courseCode);
-        });
-    });
-
-    // Table Row Hover Effect
-    const tableRows = document.querySelectorAll('tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseover', function () {
-            this.style.backgroundColor = 'var(--gray-100)';
-        });
-        row.addEventListener('mouseout', function () {
-            this.style.backgroundColor = '';
-        });
-    });
-
-    function loadCourseDetails(courseCode) {
-        const assignmentsSection = document.querySelector('.assignments-section');
-        if (assignmentsSection) {
-            const sectionTitle = assignmentsSection.querySelector('h2');
-            sectionTitle.textContent = `Current Assignments: ${courseCode}`;
-            console.log(`Loading details for ${courseCode}`);
-        }
-    }
-
     function checkNotifications() {
         console.log('Checking for new notifications...');
     }
 
     setInterval(checkNotifications, 300000);
 
-    // Fetch and Display Student Details in a Table
-    if (getStudentDetailsBtn && studentDetailsContainer) {
+    // Fetch and Display Student Details
+    if (getStudentDetailsBtn && studentDetailsContainer && additionalDetailsTable) {
         getStudentDetailsBtn.addEventListener('click', async () => {
             try {
                 const facultyName = localStorage.getItem('name');
@@ -149,11 +121,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if (!Array.isArray(studentDetails)) throw new Error("Invalid data format");
 
                 displayStudentDetails(studentDetails);
+                displayAdditionalDetails(studentDetails);
                 
             } catch (error) {
                 console.error(error);
                 studentDetailsContainer.innerHTML =
                     '<p class="error-message">Error loading student data. Please try again later.</p>';
+                additionalDetailsTable.innerHTML =
+                    '<tr><td colspan="7" class="error-message">Error loading additional details. Please try again later.</td></tr>';
             }
         });
     }
@@ -173,10 +148,29 @@ document.addEventListener('DOMContentLoaded', async function () {
                         <td>${student.address || "N/A"}</td>
                         <td>${student.date || "N/A"}</td>
                         <td>${student.time || "N/A"}</td>
-                        <td>${student.latitude?.toFixed(6)}</td>
-                        <td>${student.longitude?.toFixed(6)}</td>
+                        <td>${student.latitude?.toFixed(6) || "N/A"}</td>
+                        <td>${student.longitude?.toFixed(6) || "N/A"}</td>
                         <td><a href="${student.mapsLink}" target="_blank">View Map</a></td>
                     </tr>`).join("") +
             '</tbody></table>';
+    }
+
+    function displayAdditionalDetails(details) {
+        if (!Array.isArray(details) || details.length === 0) {
+            additionalDetailsTable.innerHTML =
+                '<tr><td colspan="7" class="no-data">No additional details found.</td></tr>';
+            return;
+        }
+
+        additionalDetailsTable.innerHTML = details.map(student => `
+            <tr>
+                <td>${student.name || "N/A"}</td>
+                <td>${student.peers || "None"}</td>
+                <td>${student.place || "N/A"}</td>
+                <td>${student.studentStatus || "None"}</td>
+                <td>${student.comments || "N/A"}</td>
+                <td>${student.emergency ? "Yes" : "No"}</td>
+                <td>${student.emergencyDetails || "N/A"}</td>
+            </tr>`).join("");
     }
 });
