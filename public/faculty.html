@@ -9,88 +9,69 @@
 </head>
 <body>
     <div class="container">
+        <!-- Top Bar for Mobile -->
+        <div class="top-bar" id="topBar">
+            <button class="hamburger" id="hamburgerBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <button class="logout-btn mobile-logout" id="mobileLogoutBtn">
+                Log Out
+            </button>
+        </div>
         <!-- Left Sidebar Navigation -->
-        <div class="sidebar">
-            <div class="profile">
-                <div class="profile-pic-container">
-                    <img id="profilePic" src="default-profile.png" alt="Profile Picture" class="profile-pic">
-                    <label for="profilePicInput" class="profile-pic-overlay">
-                        <i class="fas fa-camera"></i>
-                    </label>
-                    <input type="file" id="profilePicInput" accept="image/*" hidden>
-                </div>
-            </div>
-
+        <div class="sidebar" id="sidebar">
             <nav class="nav-menu">
                 <button class="nav-item active" data-page="dashboard">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </button>
-                <button class="nav-item">
+                <button class="nav-item" data-page="profile">
                     <i class="fas fa-user"></i> Profile
                 </button>
-                <button class="nav-item">
-                    <i class="fas fa-bell"></i> Notifications
-                </button>
-                <button class="nav-item">
-                    <i class="fas fa-shield-alt"></i> Sign-in & Security
-                </button>
-                <button class="nav-item">
+                <button class="nav-item" data-page="help">
                     <i class="fas fa-question-circle"></i> Help
                 </button>
-                <button class="nav-item">
-                    <i class="fas fa-cog"></i> Account Settings
-                </button>
             </nav>
-
-            <button class="logout-btn">
+            <button class="logout-btn desktop-logout" id="desktopLogoutBtn">
                 <i class="fas fa-sign-out-alt"></i> Log Out
             </button>
         </div>
-
+        <!-- Backdrop for mobile menu -->
+        <div class="backdrop" id="backdrop"></div>
         <!-- Main Content -->
         <div class="main-content" id="dashboardContent">
             <!-- Dashboard Header -->
             <div class="dashboard-header">
                 <h1>Welcome to Your Dashboard, Professor</h1>
                 <div class="dashboard-buttons">
-                    <!-- Button to fetch student details -->
                     <button id="getStudentDetailsBtn" class="refresh-btn">
                         <i class="fas fa-sync-alt"></i> Refresh Student Locations
                     </button>
-                    <!-- Button to notify students -->
                     <button id="notifyStudentsBtn" class="notify-btn">
                         <i class="fas fa-envelope"></i> Notify Students to Check-in
                     </button>
-                    <!-- Button to create new check-in status -->
                     <button id="createStatusBtn" class="create-status-btn">
                         <i class="fas fa-plus"></i> Create New Check-in Status
                     </button>
                 </div>
             </div>
-
             <!-- Student Location Tracking Section -->
             <div class="section student-locations">
                 <div class="section-header">
                     <i class="fas fa-map-marker-alt"></i>
                     <h2>Real-time Student Locations</h2>
                 </div>
-                <!-- Dynamic table container -->
                 <div id="studentDetailsContainer" class="table-container">
-                    <!-- Placeholder for when no data is loaded -->
                     <div class="no-data">
                         <i class="fas fa-map-marked-alt"></i>
                         <p>Click "Refresh Student Locations" to view check-ins</p>
                     </div>
                 </div>
             </div>
-
             <!-- Divider -->
             <hr class="section-divider">
-
             <!-- Current Assignments Section -->
             <div class="section assignments-section">
                 <h2>Current Assignments: ISTM 631</h2>
-                <!-- Example table for current assignments -->
                 <div class="table-container">
                     <table>
                         <thead>
@@ -102,7 +83,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Example rows -->
                             <tr>
                                 <td>John Doe</td>
                                 <td><a href="https://www.google.com/maps?q=30.6280,-96.3344" target="_blank">30.6280° N, 96.3344° W</a></td>
@@ -119,61 +99,8 @@
                     </table>
                 </div>
             </div>
-
-            <!-- Divider -->
-            <hr class="section-divider">
-
-            <!-- Previous Assignments Section -->
-            <div class="section previous-assignments">
-                <!-- Section header -->
-                <div class="section-header">
-                    <i class="fas fa-clock"></i>
-                    <h2>Previous Assignments</h2>
-                </div>
-
-                <!-- Example course grid -->
-                <div class="course-grid">
-                    <!-- Example course cards -->
-                    <div class="course-card clickable">
-                        <h3>ISTM 631</h3>
-                        <p>Last checked: 14/02/2024</p>
-                    </div>
-                    <div class="course-card clickable">
-                        <h3>ISTM 615</h3>
-                        <p>Last checked: 09/02/2024</p>
-                    </div>
-                    <div class="course-card clickable">
-                        <h3>ISTM 645</h3>
-                        <p>Last checked: 04/02/2024</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Sidebar -->
-        <div class="right-sidebar">
-            <div class="notification-panel">
-                <div class="panel-header">
-                    <i class="far fa-comment-alt"></i>
-                    <h3>Messages</h3>
-                </div>
-                <div class="panel-content">
-                    <p class="no-content">No new messages</p>
-                </div>
-            </div>
-
-            <div class="notification-panel">
-                <div class="panel-header">
-                    <i class="far fa-clipboard"></i>
-                    <h3>Requests</h3>
-                </div>
-                <div class="panel-content">
-                    <p class="no-content">No new requests</p>
-                </div>
-            </div>
         </div>
     </div>
-
     <script type="module" src="js/faculty.js"></script>
     <script type="module" src="js/notify-students.js"></script>
     <script type="module" src="js/create-status.js"></script>

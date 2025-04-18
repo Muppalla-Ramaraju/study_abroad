@@ -13,54 +13,69 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize session checker
     initSessionChecker();
 
-    // Profile Picture Upload
-    const profilePicInput = document.getElementById('profilePicInput');
-    const profilePic = document.getElementById('profilePic');
-
-    if (profilePicInput && profilePic) {
-        profilePicInput.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                if (!file.type.startsWith('image/')) {
-                    alert('Please select an image file');
-                    return;
-                }
-
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('Please select an image smaller than 5MB');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    profilePic.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    // Navigation Menu Active State
+    // DOM Elements
     const navItems = document.querySelectorAll('.nav-item');
     const mainContent = document.querySelector('.main-content');
+    const desktopLogoutBtn = document.getElementById('desktopLogoutBtn');
+    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('backdrop');
+    const getStudentDetailsBtn = document.getElementById('getStudentDetailsBtn');
+    const studentDetailsContainer = document.getElementById('studentDetailsContainer');
+    const createCheckinBtn = document.getElementById('createStatusBtn');
 
+    // Navigation Menu Active State
     navItems.forEach(item => {
         item.addEventListener('click', function () {
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
 
-            const pageType = this.textContent.trim();
-            if (pageType === 'Dashboard') {
+            const pageType = this.getAttribute('data-page');
+            if (pageType === 'dashboard') {
                 mainContent.style.display = 'block';
-            } else {
-                mainContent.style.display = 'none';
+            } else if (pageType === 'profile') {
+                mainContent.innerHTML = '<h1>Profile Page</h1><p>This is the profile section.</p>';
+                mainContent.style.display = 'block';
+            } else if (pageType === 'help') {
+                mainContent.innerHTML = '<h1>Help Page</h1><p>This is the help section.</p>';
+                mainContent.style.display = 'block';
             }
+            sidebar.classList.remove('active');
+            backdrop.classList.remove('active');
         });
     });
 
-    // Create Check-in Functionality
-    const createCheckinBtn = document.getElementById('createCheckinBtn');
+    // Hamburger Menu Toggle
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', function () {
+            sidebar.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        });
+    }
 
+    // Backdrop Click to Close Menu
+    if (backdrop) {
+        backdrop.addEventListener('click', function () {
+            sidebar.classList.remove('active');
+            backdrop.classList.remove('active');
+        });
+    }
+
+    // Logout Buttons
+    [desktopLogoutBtn, mobileLogoutBtn].forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', function () {
+                if (confirm('Are you sure you want to log out?')) {
+                    logout();
+                    sidebar.classList.remove('active');
+                    backdrop.classList.remove('active');
+                }
+            });
+        }
+    });
+
+    // Create Check-in Functionality
     if (createCheckinBtn) {
         createCheckinBtn.addEventListener('click', function (e) {
             e.preventDefault();
@@ -97,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Ensure Enter key creates a new line and does not submit
         form.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && e.target === textarea && !e.shiftKey) {
-                e.stopPropagation(); // Prevent any parent handlers
+                e.stopPropagation();
             }
         });
 
@@ -114,18 +129,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.body.removeChild(modal);
         });
 
-        // Focus the textarea immediately
         textarea.focus();
-    }
-
-    // Logout Button
-    const logoutBtn = document.querySelector('.logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function () {
-            if (confirm('Are you sure you want to log out?')) {
-                logout();
-            }
-        });
     }
 
     // Course Card Click Handler
@@ -164,22 +168,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     setInterval(checkNotifications, 300000);
 
     // Fetch and Display Student Details in a Table
-    const getStudentDetailsBtn = document.getElementById('getStudentDetailsBtn');
-    const studentDetailsContainer = document.getElementById('studentDetailsContainer');
-
     if (getStudentDetailsBtn && studentDetailsContainer) {
         getStudentDetailsBtn.addEventListener('click', async () => {
             try {
-                // Get faculty name from local storage
                 const facultyName = localStorage.getItem('name');
                 if (!facultyName) {
                     throw new Error("Faculty name not found in local storage.");
                 }
 
-                // Prepare request payload
                 const payload = { facultyName };
 
-                // Fetch student locations for the faculty
                 const response = await fetch(
                     'https://s4rruk7vn6.execute-api.us-east-1.amazonaws.com/prod/LocationFaculty',
                     {
