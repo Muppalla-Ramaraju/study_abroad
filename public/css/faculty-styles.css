@@ -278,7 +278,7 @@ td a:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 4000; /* Increased to be above sidebar (z-index: 3000) */
 }
 
 .modal-content {

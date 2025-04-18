@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const backdrop = document.getElementById('backdrop');
     const getStudentDetailsBtn = document.getElementById('getStudentDetailsBtn');
     const studentDetailsContainer = document.getElementById('studentDetailsContainer');
-    const createCheckinBtn = document.getElementById('createStatusBtn');
 
     // Navigation Menu Active State
     navItems.forEach(item => {
@@ -74,63 +73,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
         }
     });
-
-    // Create Check-in Functionality
-    if (createCheckinBtn) {
-        createCheckinBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            showCheckinModal();
-        });
-    }
-
-    function showCheckinModal() {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-
-        modal.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Please Enter Your Message</h2>
-                </div>
-                <form id="messageForm">
-                    <div class="form-group">
-                        <textarea id="announcement" name="announcement" placeholder="Enter your announcement for students" maxlength="1000"></textarea>
-                    </div>
-                    <div class="modal-buttons">
-                        <button type="submit">Post</button>
-                        <button type="button" class="cancel">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        const form = modal.querySelector('#messageForm');
-        const textarea = modal.querySelector('#announcement');
-
-        // Ensure Enter key creates a new line and does not submit
-        form.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && e.target === textarea && !e.shiftKey) {
-                e.stopPropagation();
-            }
-        });
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const announcement = formData.get('announcement');
-            console.log('Announcement posted:', announcement);
-            document.body.removeChild(modal);
-        });
-
-        const cancelBtn = modal.querySelector('.cancel');
-        cancelBtn.addEventListener('click', function () {
-            document.body.removeChild(modal);
-        });
-
-        textarea.focus();
-    }
 
     // Course Card Click Handler
     const courseCards = document.querySelectorAll('.course-card');
