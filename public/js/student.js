@@ -6,14 +6,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Check if session is expired or invalid
     if (!idToken || userRole !== 'student') {
-        logout(); // No token or invalid role, log out immediately
+        logout();
         return;
     }
 
     // Initialize session checker
     initSessionChecker();
 
-    
     // DOM Elements
     let getLocationBtn = document.getElementById('getLocation');
     let coordinatesDisplay = document.getElementById('coordinates');
@@ -24,12 +23,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     let checkInBtn = document.getElementById('checkInBtn');
     let mapsLink = document.getElementById('mapsLink');
     const navButtons = document.querySelectorAll('.nav-menu button');
-    const logoutBtn = document.querySelector('.logout-btn');
+    const desktopLogoutBtn = document.getElementById('desktopLogoutBtn');
+    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
     let sosButton = document.getElementById('sosButton');
     let emergencyForm = document.getElementById('emergencyForm');
     let emergencyDetails = document.getElementById('emergencyDetails');
     let submitEmergencyDetails = document.getElementById('submitEmergencyDetails');
     let skipEmergencyDetails = document.getElementById('skipEmergencyDetails');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('backdrop');
 
     // API Configuration
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
@@ -47,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Create a template for dashboard content
     const dashboardTemplate = document.querySelector('.main-content').cloneNode(true);
-    let currentPage = 'dashboard'; // Track current page
+    let currentPage = 'dashboard';
 
     // Function to get address from coordinates using Geoapify Reverse Geocoding API
     async function getAddressFromCoordinates(lat, lon) {
@@ -90,8 +93,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .map(option => option.value)
                 .filter(value => value !== "None")
                 .join(", ");
-
-          // ADD the custom status
             const selectedStatus = customStatusInput.value;
 
             const payload = {
@@ -105,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 comments: commentsInput.value,
                 emergency: isEmergency,
                 emergencyDetails: emergencyMessage,
-                studentStatus: selectedStatus // ADD custom status to payload
+                studentStatus: selectedStatus
             };
 
             console.log('Payload being sent to API:', payload);
@@ -294,6 +295,16 @@ document.addEventListener('DOMContentLoaded', async function () {
                 this.style.height = `${this.scrollHeight}px`;
             });
         }
+
+        hamburgerBtn.addEventListener('click', function () {
+            sidebar.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        });
+
+        backdrop.addEventListener('click', function () {
+            sidebar.classList.remove('active');
+            backdrop.classList.remove('active');
+        });
     }
 
     // Populate student dropdown
@@ -324,7 +335,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             
             const students = await response.json();
     
-            withWhomInput.innerHTML = ""; // Clear existing options
+            withWhomInput.innerHTML = "";
             withWhomInput.setAttribute('multiple', 'true');
             withWhomInput.size = Math.min(5, students.length + 1);
             
@@ -413,7 +424,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     }
 
                     // Restore selected peers
-                    withWhomInput.innerHTML = ""; // Clear to avoid duplicates
+                    withWhomInput.innerHTML = "";
                     const noneOption = document.createElement("option");
                     noneOption.value = "None";
                     noneOption.textContent = "None";
@@ -433,6 +444,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                     initializeEventListeners();
                 }
                 currentPage = page;
+                sidebar.classList.remove('active');
+                backdrop.classList.remove('active');
             }
         });
     });
@@ -442,9 +455,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     populateStudentDropdown();
     document.querySelector('[data-page="dashboard"]').classList.add('active');
 
-    logoutBtn.addEventListener('click', function () {
-        if (confirm('Are you sure you want to log out?')) {
-            logout();
+    // Attach logout event listeners to both buttons
+    [desktopLogoutBtn, mobileLogoutBtn].forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', function () {
+                if (confirm('Are you sure you want to log out?')) {
+                    logout();
+                    sidebar.classList.remove('active');
+                    backdrop.classList.remove('active');
+                }
+            });
         }
     });
 });
