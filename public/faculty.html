@@ -38,60 +38,63 @@
         <!-- Backdrop for mobile menu -->
         <div class="backdrop" id="backdrop"></div>
         <!-- Main Content -->
-        <div class="main-content" id="dashboardContent">
-            <!-- Dashboard Header -->
-            <div class="dashboard-header">
-                <h1>Welcome to Your Dashboard, Professor</h1>
-                <div class="dashboard-buttons">
-                    <button id="getStudentDetailsBtn" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> Refresh Student Locations
-                    </button>
-                    <button id="notifyStudentsBtn" class="notify-btn">
-                        <i class="fas fa-envelope"></i> Notify Students to Check-in
-                    </button>
-                    <button id="createStatusBtn" class="create-status-btn">
-                        <i class="fas fa-plus"></i> Create New Check-in Status
-                    </button>
-                </div>
-            </div>
-            <!-- Student Location Tracking Section -->
-            <div class="section student-locations">
-                <div class="section-header">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h2>Real-time Student Locations</h2>
-                </div>
-                <div id="studentDetailsContainer" class="table-container">
-                    <div class="no-data">
-                        <i class="fas fa-map-marked-alt"></i>
-                        <p>Click "Refresh Student Locations" to view check-ins</p>
+        <div class="main-content" id="mainContent">
+            <!-- Dashboard Content -->
+            <div id="dashboardContent">
+                <!-- Dashboard Header -->
+                <div class="dashboard-header">
+                    <h1>Welcome to Your Dashboard, Professor</h1>
+                    <div class="dashboard-buttons">
+                        <button id="getStudentDetailsBtn" class="refresh-btn">
+                            <i class="fas fa-sync-alt"></i> Refresh Student Locations
+                        </button>
+                        <button id="notifyStudentsBtn" class="notify-btn">
+                            <i class="fas fa-envelope"></i> Notify Students to Check-in
+                        </button>
+                        <button id="createStatusBtn" class="create-status-btn">
+                            <i class="fas fa-plus"></i> Create New Check-in Status
+                        </button>
                     </div>
                 </div>
-            </div>
-            <!-- Divider -->
-            <hr class="section-divider">
-            <!-- Additional Details Section -->
-            <div class="section additional-details-section">
-                <div class="section-header">
-                    <i class="fas fa-info-circle"></i>
-                    <h2>Additional Details</h2>
+                <!-- Student Location Tracking Section -->
+                <div class="section student-locations">
+                    <div class="section-header">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h2>Real-time Student Locations</h2>
+                    </div>
+                    <div id="studentDetailsContainer" class="table-container">
+                        <div class="no-data">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <p>Click "Refresh Student Locations" to view check-ins</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Student Name</th>
-                                <th>Peers</th>
-                                <th>Place</th>
-                                <th>Status</th>
-                                <th>Comments</th>
-                                <th>Emergency</th>
-                                <th>Emergency Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="additionalDetailsTable">
-                            <!-- Data will be populated by LocationsFaculty Lambda -->
-                        </tbody>
-                    </table>
+                <!-- Divider -->
+                <hr class="section-divider">
+                <!-- Additional Details Section -->
+                <div class="section additional-details-section">
+                    <div class="section-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h2>Additional Details</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Peers</th>
+                                    <th>Place</th>
+                                    <th>Status</th>
+                                    <th>Comments</th>
+                                    <th>Emergency</th>
+                                    <th>Emergency Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="additionalDetailsTable">
+                                <!-- Data will be populated by LocationsFaculty Lambda -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

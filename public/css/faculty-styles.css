@@ -351,6 +351,144 @@ td a:hover {
     color: var(--gray-700);
 }
 
+/* Profile Styles */
+.profile-section {
+    background-color: var(--white);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.profile-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.edit-btn {
+    background-color: var(--tamu-maroon);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    margin-bottom: 0.25rem;
+}
+
+.required {
+    color: red;
+}
+
+.form-group input {
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    background-color: #f8f8f8;
+}
+
+.form-group input:disabled {
+    background-color: #f8f8f8;
+    color: var(--gray-700);
+    cursor: not-allowed;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.cancel-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--gray-300);
+    background-color: white;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.save-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--tamu-maroon);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.input-error {
+    border-color: red !important;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Help Styles */
+.help-section {
+    background-color: var(--white);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.help-section h2 {
+    font-size: 1.25rem;
+    color: var(--gray-700);
+    margin-bottom: 1rem;
+}
+
+#faqContent {
+    font-size: 1rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+#faqContent h3 {
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--tamu-maroon);
+}
+
+#faqContent p {
+    margin-bottom: 1rem;
+}
+
 /* Mobile Styles */
 @media (max-width: 768px) {
     .container {
@@ -451,5 +589,22 @@ td a:hover {
         font-size: 1rem;
         min-width: 100px;
         text-align: center;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .help-section h2 {
+        font-size: 1rem;
+    }
+
+    #faqContent {
+        font-size: 0.9rem;
+    }
+
+    #faqContent h3 {
+        font-size: 1rem;
     }
 }

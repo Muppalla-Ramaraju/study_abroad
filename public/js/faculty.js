@@ -23,8 +23,83 @@ document.addEventListener('DOMContentLoaded', async function () {
     const backdrop = document.getElementById('backdrop');
 
     // Store initial dashboard content and student data
-    const initialDashboardContent = mainContent.innerHTML;
+    const initialDashboardContent = document.getElementById('dashboardContent').innerHTML;
     let studentData = null;
+
+    // Profile HTML content
+    const profileContent = `
+        <div class="profile-section">
+            <div class="profile-header">
+                <div class="profile-title">
+                    <i class="fas fa-user"></i>
+                    <h1>Profile Information</h1>
+                </div>
+                <button id="editProfileBtn" class="edit-btn">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+            <form id="profileForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name <span class="required">*</span></label>
+                        <input type="text" id="firstName" name="firstName" value="John" disabled required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name <span class="required">*</span></label>
+                        <input type="text" id="lastName" name="lastName" value="Doe" disabled required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="johndoe" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="john.doe@example.com" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="+1 (555) 123-4567" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" value="•••••••" disabled>
+                </div>
+                <div class="form-actions" style="display: none;">
+                    <button type="button" id="cancelBtn" class="cancel-btn">Cancel</button>
+                    <button type="submit" id="saveBtn" class="save-btn">Save</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    // Help HTML content with embedded FAQs
+    const helpContent = `
+        <div class="help-section">
+            <h1>Help & Support</h1>
+            <div class="faq-container">
+                <h2>Frequently Asked Questions</h2>
+                <div id="faqContent">
+                    <h3>1. How do I view the current locations of my students?</h3>
+                    <p>Click the "Refresh Student Locations" button on the dashboard to fetch and display the latest check-in data, including student names, addresses, dates, times, and map links.</p>
+                    <h3>2. How can I notify students to check in for a required event?</h3>
+                    <p>Use the "Notify Students to Check-in" button on the dashboard. This sends a notification to all students in your class, prompting them to submit their current location and status.</p>
+                    <h3>3. What does auditing student locations mean, and how do I do it?</h3>
+                    <p>Auditing involves verifying student locations against their reported check-ins. After refreshing student locations, review the "Real-time Student Locations" and "Additional Details" tables to ensure the data aligns with expected locations.</p>
+                    <h3>4. How do I create a new check-in status for students to select?</h3>
+                    <p>Click the "Create New Check-in Status" button to open a form where you can define a custom status. Enter the status name and any additional fields, then submit to make it available for students.</p>
+                    <h3>5. What should I do if no student data appears after refreshing locations?</h3>
+                    <p>Ensure you are connected to the internet and your faculty name is correctly set in the system. If the issue persists, contact the administrator to verify the class setup and API connectivity.</p>
+                    <h3>6. Can I customize notifications sent to students?</h3>
+                    <p>Currently, notifications are standardized. To request custom notification options, please contact the system administrator with your requirements.</p>
+                    <h3>7. How often should I refresh student locations?</h3>
+                    <p>Refresh as needed, typically before or during required check-in events. The system fetches the latest data each time you click "Refresh Student Locations."</p>
+                    <h3>8. Who do I contact for technical support?</h3>
+                    <p>Reach out to the study abroad program administrator via email at support@tamu-studyabroad.edu or through the university's IT helpdesk.</p>
+                </div>
+            </div>
+        </div>
+    `;
 
     // Function to fetch and display student details
     async function fetchStudentDetails(container, table) {
@@ -94,6 +169,105 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // Function to attach Profile event listeners
+    function attachProfileEventListeners() {
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const formActions = document.querySelector('.form-actions');
+        const formInputs = document.querySelectorAll('#profileForm input');
+        const profileForm = document.getElementById('profileForm');
+
+        // Store original values to revert changes on cancel
+        const originalValues = {};
+        formInputs.forEach(input => {
+            originalValues[input.id] = input.value;
+        });
+
+        // Enable editing
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', function() {
+                formInputs.forEach(input => {
+                    input.disabled = false;
+                });
+                formActions.style.display = 'flex';
+                editProfileBtn.style.display = 'none';
+            });
+        }
+
+        // Cancel editing
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                formInputs.forEach(input => {
+                    input.disabled = true;
+                    input.value = originalValues[input.id];
+                    // Remove any error styling
+                    input.classList.remove('input-error');
+                    
+                    // Remove any error messages
+                    const errorElement = input.parentElement.querySelector('.error-message');
+                    if (errorElement) {
+                        errorElement.remove();
+                    }
+                });
+                formActions.style.display = 'none';
+                editProfileBtn.style.display = 'flex';
+            });
+        }
+
+        // Form submission with validation
+        if (profileForm) {
+            profileForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Clear previous error messages
+                document.querySelectorAll('.error-message').forEach(el => el.remove());
+                document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+                
+                let isValid = true;
+                
+                // Validate required fields
+                const firstName = document.getElementById('firstName');
+                const lastName = document.getElementById('lastName');
+                
+                if (!firstName.value.trim()) {
+                    isValid = false;
+                    showError(firstName, 'First name is required');
+                }
+                
+                if (!lastName.value.trim()) {
+                    isValid = false;
+                    showError(lastName, 'Last name is required');
+                }
+                
+                if (isValid) {
+                    // Save new values as original values
+                    formInputs.forEach(input => {
+                        originalValues[input.id] = input.value;
+                        input.disabled = true;
+                    });
+                    
+                    formActions.style.display = 'none';
+                    editProfileBtn.style.display = 'flex';
+                    
+                    // Show success message
+                    alert('Profile information saved successfully!');
+                }
+            });
+        }
+
+        // Helper function to show validation errors
+        function showError(inputElement, message) {
+            inputElement.classList.add('input-error');
+            
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error-message';
+            errorElement.textContent = message;
+            
+            inputElement.parentElement.appendChild(errorElement);
+        }
+    }
+
     // Navigation Menu Active State
     navItems.forEach(item => {
         item.addEventListener('click', function () {
@@ -103,7 +277,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const pageType = this.getAttribute('data-page');
             if (pageType === 'dashboard') {
                 // Restore original dashboard content
-                mainContent.innerHTML = initialDashboardContent;
+                mainContent.innerHTML = `<div id="dashboardContent">${initialDashboardContent}</div>`;
                 // Restore student data if available
                 const studentDetailsContainer = document.getElementById('studentDetailsContainer');
                 const additionalDetailsTable = document.getElementById('additionalDetailsTable');
@@ -114,9 +288,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // Re-attach event listeners
                 attachDashboardEventListeners();
             } else if (pageType === 'profile') {
-                mainContent.innerHTML = '<h1>Profile Page</h1><p>This is the profile section.</p>';
+                mainContent.innerHTML = profileContent;
+                attachProfileEventListeners();
             } else if (pageType === 'help') {
-                mainContent.innerHTML = '<h1>Help Page</h1><p>This is the help section.</p>';
+                mainContent.innerHTML = helpContent;
             }
             mainContent.style.display = 'block';
             sidebar.classList.remove('active');
