@@ -21,9 +21,78 @@ document.addEventListener('DOMContentLoaded', async function () {
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('backdrop');
-    const getStudentDetailsBtn = document.getElementById('getStudentDetailsBtn');
-    const studentDetailsContainer = document.getElementById('studentDetailsContainer');
-    const additionalDetailsTable = document.getElementById('additionalDetailsTable');
+
+    // Store initial dashboard content and student data
+    const initialDashboardContent = mainContent.innerHTML;
+    let studentData = null;
+
+    // Function to fetch and display student details
+    async function fetchStudentDetails(container, table) {
+        try {
+            const facultyName = localStorage.getItem('name');
+            if (!facultyName) {
+                throw new Error("Faculty name not found in local storage.");
+            }
+
+            const payload = { facultyName };
+
+            const response = await fetch(
+                'https://s4rruk7vn6.execute-api.us-east-1.amazonaws.com/prod/LocationFaculty',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                }
+            );
+
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+            const rawData = await response.json();
+            console.log("Raw API Response:", rawData);
+
+            let studentDetails;
+            try {
+                studentDetails =
+                    typeof rawData.body === "string"
+                        ? JSON.parse(rawData.body)
+                        : rawData.body || rawData;
+            } catch (err) {
+                throw new Error("Failed to parse API response");
+            }
+
+            if (!Array.isArray(studentDetails)) throw new Error("Invalid data format");
+
+            studentData = studentDetails; // Store the data
+            displayStudentDetails(studentDetails, container);
+            displayAdditionalDetails(studentDetails, table);
+            
+        } catch (error) {
+            console.error(error);
+            container.innerHTML =
+                '<p class="error-message">Error loading student data. Please try again later.</p>';
+            table.innerHTML =
+                '<tr><td colspan="7" class="error-message">Error loading additional details. Please try again later.</td></tr>';
+        }
+    }
+
+    // Function to attach or re-attach event listeners for dashboard buttons
+    function attachDashboardEventListeners() {
+        const getStudentDetailsBtn = document.getElementById('getStudentDetailsBtn');
+        const studentDetailsContainer = document.getElementById('studentDetailsContainer');
+        const additionalDetailsTable = document.getElementById('additionalDetailsTable');
+
+        if (getStudentDetailsBtn && studentDetailsContainer && additionalDetailsTable) {
+            // Remove existing listeners to prevent duplicates
+            getStudentDetailsBtn.replaceWith(getStudentDetailsBtn.cloneNode(true));
+            const newGetStudentDetailsBtn = document.getElementById('getStudentDetailsBtn');
+            
+            newGetStudentDetailsBtn.addEventListener('click', () => {
+                fetchStudentDetails(studentDetailsContainer, additionalDetailsTable);
+            });
+        }
+    }
 
     // Navigation Menu Active State
     navItems.forEach(item => {
@@ -33,14 +102,23 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             const pageType = this.getAttribute('data-page');
             if (pageType === 'dashboard') {
-                mainContent.style.display = 'block';
+                // Restore original dashboard content
+                mainContent.innerHTML = initialDashboardContent;
+                // Restore student data if available
+                const studentDetailsContainer = document.getElementById('studentDetailsContainer');
+                const additionalDetailsTable = document.getElementById('additionalDetailsTable');
+                if (studentData && studentDetailsContainer && additionalDetailsTable) {
+                    displayStudentDetails(studentData, studentDetailsContainer);
+                    displayAdditionalDetails(studentData, additionalDetailsTable);
+                }
+                // Re-attach event listeners
+                attachDashboardEventListeners();
             } else if (pageType === 'profile') {
                 mainContent.innerHTML = '<h1>Profile Page</h1><p>This is the profile section.</p>';
-                mainContent.style.display = 'block';
             } else if (pageType === 'help') {
                 mainContent.innerHTML = '<h1>Help Page</h1><p>This is the help section.</p>';
-                mainContent.style.display = 'block';
             }
+            mainContent.style.display = 'block';
             sidebar.classList.remove('active');
             backdrop.classList.remove('active');
         });
@@ -81,66 +159,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     setInterval(checkNotifications, 300000);
 
-    // Fetch and Display Student Details
-    if (getStudentDetailsBtn && studentDetailsContainer && additionalDetailsTable) {
-        getStudentDetailsBtn.addEventListener('click', async () => {
-            try {
-                const facultyName = localStorage.getItem('name');
-                if (!facultyName) {
-                    throw new Error("Faculty name not found in local storage.");
-                }
+    // Initial event listener setup
+    attachDashboardEventListeners();
 
-                const payload = { facultyName };
-
-                const response = await fetch(
-                    'https://s4rruk7vn6.execute-api.us-east-1.amazonaws.com/prod/LocationFaculty',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    }
-                );
-
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                const rawData = await response.json();
-                console.log("Raw API Response:", rawData);
-
-                let studentDetails;
-                try {
-                    studentDetails =
-                        typeof rawData.body === "string"
-                            ? JSON.parse(rawData.body)
-                            : rawData.body || rawData;
-                } catch (err) {
-                    throw new Error("Failed to parse API response");
-                }
-
-                if (!Array.isArray(studentDetails)) throw new Error("Invalid data format");
-
-                displayStudentDetails(studentDetails);
-                displayAdditionalDetails(studentDetails);
-                
-            } catch (error) {
-                console.error(error);
-                studentDetailsContainer.innerHTML =
-                    '<p class="error-message">Error loading student data. Please try again later.</p>';
-                additionalDetailsTable.innerHTML =
-                    '<tr><td colspan="7" class="error-message">Error loading additional details. Please try again later.</td></tr>';
-            }
-        });
-    }
-
-    function displayStudentDetails(details) {
+    function displayStudentDetails(details, container) {
         if (!Array.isArray(details) || details.length === 0) {
-            studentDetailsContainer.innerHTML =
+            container.innerHTML =
                 '<p class="no-data">No student check-ins found.</p>';
             return;
         }
 
-        studentDetailsContainer.innerHTML =
+        container.innerHTML =
             '<table class="student-details-table"><thead><tr><th>Name</th><th>Address</th><th>Date</th><th>Time</th><th>Latitude</th><th>Longitude</th><th>Maps Link</th></tr></thead><tbody>' +
             details.map(student => `
                     <tr>
@@ -155,14 +184,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             '</tbody></table>';
     }
 
-    function displayAdditionalDetails(details) {
+    function displayAdditionalDetails(details, table) {
         if (!Array.isArray(details) || details.length === 0) {
-            additionalDetailsTable.innerHTML =
+            table.innerHTML =
                 '<tr><td colspan="7" class="no-data">No additional details found.</td></tr>';
             return;
         }
 
-        additionalDetailsTable.innerHTML = details.map(student => `
+        table.innerHTML = details.map(student => `
             <tr>
                 <td>${student.name || "N/A"}</td>
                 <td>${student.peers || "None"}</td>
