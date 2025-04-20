@@ -342,6 +342,34 @@ h1 {
     margin-top: 10px;
 }
 
+.save-btn {
+    background-color: var(--tamu-maroon);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save-btn:hover {
+    background-color: var(--tamu-maroon-dark);
+}
+
+.cancel-btn {
+    background-color: var(--gray-200);
+    color: var(--gray-600);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+    background-color: var(--gray-300);
+}
+
 /* Dropdown Styles */
 .dropdown-select {
     width: 100%;
@@ -389,10 +417,147 @@ h1 {
 
 /* Helper text styling */
 .helper-text {
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
     font-size: 0.8rem;
     color: var(--gray-600);
     font-style: italic;
+}
+
+/* Profile Styles */
+.profile-section {
+    background-color: var(--white);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.profile-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-title h1 {
+    color: var(--tamu-maroon);
+}
+
+.edit-btn {
+    background-color: var(--tamu-maroon);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.edit-btn:hover {
+    background-color: var(--tamu-maroon-dark);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-bottom: 0.25rem;
+}
+
+.required {
+    color: red;
+}
+
+.form-group input {
+    padding: 0.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    background-color: #f8f8f8;
+}
+
+.form-group input:disabled {
+    background-color: #f8f8f8;
+    color: var(--gray-600);
+    cursor: not-allowed;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.input-error {
+    border-color: red !important;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Help Styles */
+.help-section {
+    background-color: var(--white);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.help-section h1 {
+    color: #333;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.help-section h2 {
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+#faqContent {
+    font-size: 1rem;
+    color: var(--gray-600);
+    line-height: 1.6;
+}
+
+#faqContent h3 {
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--tamu-maroon);
+}
+
+#faqContent p {
+    margin-bottom: 1rem;
 }
 
 /* Mobile Styles */
@@ -515,5 +680,26 @@ h1 {
     .emergency-form-content {
         width: 95%;
         padding: 15px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .help-section h1 {
+        font-size: 1.5rem;
+    }
+
+    .help-section h2 {
+        font-size: 1.25rem;
+    }
+
+    #faqContent {
+        font-size: 0.9rem;
+    }
+
+    #faqContent h3 {
+        font-size: 1rem;
     }
 }

@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Initialize session checker
-    initSessionChecker();
+    initSessionChecker(); // Note: If the "Failed to load custom statuses" message persists, check this function in session.js for any status-fetching logic.
 
     // DOM Elements
     let getLocationBtn = document.getElementById('getLocation');
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('backdrop');
+    const mainContent = document.getElementById('mainContent');
 
     // API Configuration
     const API_ENDPOINT = 'https://y4p26puv7l.execute-api.us-east-1.amazonaws.com/locations/locations';
@@ -49,8 +50,81 @@ document.addEventListener('DOMContentLoaded', async function () {
     };
 
     // Create a template for dashboard content
-    const dashboardTemplate = document.querySelector('.main-content').cloneNode(true);
+    const dashboardTemplate = document.querySelector('.dashboard-content').cloneNode(true);
     let currentPage = 'dashboard';
+
+    // Profile HTML content
+    const profileContent = `
+        <div class="profile-section">
+            <div class="profile-header">
+                <div class="profile-title">
+                    <i class="fas fa-user"></i>
+                    <h1>Profile Information</h1>
+                </div>
+                <button id="editProfileBtn" class="edit-btn">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+            <form id="profileForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name <span class="required">*</span></label>
+                        <input type="text" id="firstName" name="firstName" value="John" disabled required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name <span class="required">*</span></label>
+                        <input type="text" id="lastName" name="lastName" value="Doe" disabled required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="johndoe" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="john.doe@example.com" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="+1 (555) 123-4567" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" value="•••••••" disabled>
+                </div>
+                <div class="form-actions" style="display: none;">
+                    <button type="button" id="cancelBtn" class="cancel-btn">Cancel</button>
+                    <button type="submit" id="saveBtn" class="save-btn">Save</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    // Help HTML content with embedded FAQs
+    const helpContent = `
+        <div class="help-section">
+            <h1>Help & Support</h1>
+            <div class="faq-container">
+                <h2>Frequently Asked Questions</h2>
+                <div id="faqContent">
+                    <h3>1. How do I check in with my location?</h3>
+                    <p>Click "Get Current Location" to fetch your coordinates and address, fill in the check-in details, and click "Check In" to submit.</p>
+                    <h3>2. How can I see my current check-in status?</h3>
+                    <p>After checking in, your latest location and details are displayed under "Current Location" and "Address" on the dashboard.</p>
+                    <h3>3. How do I include peers in my check-in?</h3>
+                    <p>In the "My Peers" dropdown, hold Ctrl/Cmd to select multiple peers you're with, then submit your check-in.</p>
+                    <h3>4. What should I do if I feel unsafe?</h3>
+                    <p>Click the "SOS" button to send an emergency signal. You can add details about your situation or skip to send immediately.</p>
+                    <h3>5. What happens after I check in?</h3>
+                    <p>Your location and details are sent to your faculty member, and a Google Maps link is generated for your check-in location.</p>
+                    <h3>6. Who can see my check-in information?</h3>
+                    <p>Your faculty member can view your check-in details to ensure your safety.</p>
+                    <h3>7. What if I can’t get my location?</h3>
+                    <p>Ensure location services are enabled on your device. If the issue persists, contact support at support@tamu-studyabroad.edu.</p>
+                </div>
+            </div>
+        </div>
+    `;
 
     // Function to get address from coordinates using Geoapify Reverse Geocoding API
     async function getAddressFromCoordinates(lat, lon) {
@@ -93,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .map(option => option.value)
                 .filter(value => value !== "None")
                 .join(", ");
-            const selectedStatus = customStatusInput.value;
+            const selectedStatus = document.getElementById('customStatusInput').value;
 
             const payload = {
                 id: idToken,
@@ -305,6 +379,119 @@ document.addEventListener('DOMContentLoaded', async function () {
             sidebar.classList.remove('active');
             backdrop.classList.remove('active');
         });
+
+        // Handle "My Peers" dropdown to prevent selecting "None" with other options
+        withWhomInput.addEventListener('change', function () {
+            const selectedOptions = Array.from(this.selectedOptions).map(option => option.value);
+            const noneIndex = selectedOptions.indexOf('None');
+            
+            if (noneIndex !== -1 && selectedOptions.length > 1) {
+                // If "None" is selected along with other options, deselect "None"
+                this.options[0].selected = false;
+            } else if (noneIndex === -1 && selectedOptions.length > 0) {
+                // If other options are selected, ensure "None" is deselected
+                this.options[0].selected = false;
+            }
+        });
+    }
+
+    // Function to attach Profile event listeners
+    function attachProfileEventListeners() {
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const formActions = document.querySelector('.form-actions');
+        const formInputs = document.querySelectorAll('#profileForm input');
+        const profileForm = document.getElementById('profileForm');
+
+        // Store original values to revert changes on cancel
+        const originalValues = {};
+        formInputs.forEach(input => {
+            originalValues[input.id] = input.value;
+        });
+
+        // Enable editing
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', function() {
+                formInputs.forEach(input => {
+                    input.disabled = false;
+                });
+                formActions.style.display = 'flex';
+                editProfileBtn.style.display = 'none';
+            });
+        }
+
+        // Cancel editing
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                formInputs.forEach(input => {
+                    input.disabled = true;
+                    input.value = originalValues[input.id];
+                    // Remove any error styling
+                    input.classList.remove('input-error');
+                    
+                    // Remove any error messages
+                    const errorElement = input.parentElement.querySelector('.error-message');
+                    if (errorElement) {
+                        errorElement.remove();
+                    }
+                });
+                formActions.style.display = 'none';
+                editProfileBtn.style.display = 'flex';
+            });
+        }
+
+        // Form submission with validation
+        if (profileForm) {
+            profileForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Clear previous error messages
+                document.querySelectorAll('.error-message').forEach(el => el.remove());
+                document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+                
+                let isValid = true;
+                
+                // Validate required fields
+                const firstName = document.getElementById('firstName');
+                const lastName = document.getElementById('lastName');
+                
+                if (!firstName.value.trim()) {
+                    isValid = false;
+                    showError(firstName, 'First name is required');
+                }
+                
+                if (!lastName.value.trim()) {
+                    isValid = false;
+                    showError(lastName, 'Last name is required');
+                }
+                
+                if (isValid) {
+                    // Save new values as original values
+                    formInputs.forEach(input => {
+                        originalValues[input.id] = input.value;
+                        input.disabled = true;
+                    });
+                    
+                    formActions.style.display = 'none';
+                    editProfileBtn.style.display = 'flex';
+                    
+                    // Show success message
+                    alert('Profile information saved successfully!');
+                }
+            });
+        }
+
+        // Helper function to show validation errors
+        function showError(inputElement, message) {
+            inputElement.classList.add('input-error');
+            
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error-message';
+            errorElement.textContent = message;
+            
+            inputElement.parentElement.appendChild(errorElement);
+        }
     }
 
     // Populate student dropdown
@@ -352,13 +539,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                     withWhomInput.appendChild(option);
                 }
             });
-    
-            const helperText = document.querySelector('.helper-text') || document.createElement("p");
-            helperText.textContent = "Hold Ctrl/Cmd to select multiple students";
-            helperText.className = "helper-text";
-            if (!document.querySelector('.helper-text')) {
-                withWhomInput.parentNode.appendChild(helperText);
-            }
             
         } catch (error) {
             console.error("Error loading students:", error);
@@ -372,7 +552,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             this.classList.add('active');
 
             const page = this.getAttribute('data-page');
-            const mainContent = document.querySelector('.main-content');
 
             if (page !== currentPage) {
                 // Save current state before switching
@@ -386,9 +565,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                 };
 
                 if (page === 'profile') {
-                    mainContent.innerHTML = '<h1>Profile Page</h1><p>This is the profile section.</p>';
+                    mainContent.innerHTML = profileContent;
+                    attachProfileEventListeners();
                 } else if (page === 'help') {
-                    mainContent.innerHTML = '<h1>Help Page</h1><p>This is the help section.</p>';
+                    mainContent.innerHTML = helpContent;
                 } else if (page === 'dashboard') {
                     // Restore dashboard content
                     mainContent.innerHTML = dashboardTemplate.innerHTML;
