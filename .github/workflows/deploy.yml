@@ -9,7 +9,7 @@ on:
         default: "default"
 
 env:
-  AWS_REGION: us-west-2
+  AWS_REGION: us-west-1
   TF_WORKING_DIR: terraform-project
 
 jobs:
@@ -98,7 +98,7 @@ jobs:
           AWS_S3_BUCKET: ${{ needs.deploy-iac.outputs.s3_bucket_name }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-west-2
+          AWS_REGION: us-west-1
           SOURCE_DIR: public
 
       - name: Invalidate CloudFront Cache
@@ -106,6 +106,6 @@ jobs:
         env:
           DISTRIBUTION: ${{ needs.deploy-iac.outputs.cloudfront_distribution_id }}
           PATHS: '/*'
-          AWS_REGION: us-west-2
+          AWS_REGION: us-west-1
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
