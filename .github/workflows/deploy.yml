@@ -8,10 +8,9 @@ on:
         required: false
         default: "default"
 
-
 env:
   AWS_REGION: us-west-2
-  TF_WORKING_DIR: terraform-project
+  TF_WORKING_DIR: muppalla-ramaraju-study_abroad/terraform-project
 
 jobs:
   deploy-iac:
@@ -54,7 +53,7 @@ jobs:
       - name: Zip createUser Lambda
         run: |
           mkdir lambda-package
-          cp backend/createUser.py lambda-package/lambda_function.py
+          cp muppalla-ramaraju-study_abroad/backend/createUser.py lambda-package/lambda_function.py
           cd lambda-package
           zip -r ../createUser.zip .
           cd ..
@@ -87,7 +86,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_REGION }}
-          SOURCE_DIR: public
+          SOURCE_DIR: muppalla-ramaraju-study_abroad/public
 
       - name: Invalidate CloudFront Cache
         uses: chetan/invalidate-cloudfront-action@v2
