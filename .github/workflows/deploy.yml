@@ -1,9 +1,13 @@
 name: Full Deploy Pipeline
 
 on:
-  push:
-    branches:
-      - iac-test-branch
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: "Name of the target you're deploying (optional)"
+        required: false
+        default: "default"
+
 
 env:
   AWS_REGION: us-west-2
