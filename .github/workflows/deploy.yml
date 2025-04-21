@@ -10,7 +10,7 @@ on:
 
 env:
   AWS_REGION: us-west-2
-  TF_WORKING_DIR: muppalla-ramaraju-study_abroad/terraform-project
+  TF_WORKING_DIR: Muppalla-Ramaraju/study_abroad/tree/main/terraform-project
 
 jobs:
   deploy-iac:
@@ -53,7 +53,7 @@ jobs:
       - name: Zip createUser Lambda
         run: |
           mkdir lambda-package
-          cp muppalla-ramaraju-study_abroad/backend/createUser.py lambda-package/lambda_function.py
+          cp Muppalla-Ramaraju/study_abroad/tree/main/backend/createUser.py lambda-package/lambda_function.py
           cd lambda-package
           zip -r ../createUser.zip .
           cd ..
