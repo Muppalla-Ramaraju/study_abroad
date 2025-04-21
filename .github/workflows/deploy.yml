@@ -73,7 +73,7 @@ jobs:
           AWS_S3_BUCKET: ${{ needs.deploy-iac.outputs.s3_bucket_name }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_REGION: us-west-2
           SOURCE_DIR: public
       - name: Invalidate CloudFront Cache
         uses: chetan/invalidate-cloudfront-action@v2
