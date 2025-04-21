@@ -48,6 +48,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
         await addFacultyToClass(classId, idToken);
     });
+
+    // Navigation Buttons Event Listeners
+    document.getElementById('previousBtn').addEventListener('click', () => {
+        // Redirect to previous page (replace 'previous-page.html' with your actual page)
+        window.location.href = 'admin.html';
+    });
+
+    document.getElementById('saveAndExitBtn').addEventListener('click', () => {
+        // Redirect to previous page (replace 'previous-page.html' with your actual page)
+        window.location.href = 'admin.html';
+    });
+
+    // Delete Class Functionality
+    document.getElementById('deleteClassBtn').addEventListener('click', async () => {
+        if (confirm('Are you sure you want to delete this class?')) {
+            try {
+                const deleteSuccess = await deleteClass(classId, idToken);
+                if (deleteSuccess) {
+                    alert('Class deleted successfully!');
+                    window.location.href = 'admin.html'; // Redirect to admin page after deletion
+                } else {
+                    alert('Failed to delete class.');
+                }
+            } catch (error) {
+                console.error("Error deleting class:", error);
+                alert('Error deleting class. Please try again.');
+            }
+        }
+    });
 });
 
 async function fetchClassDetails(classId, idToken) {
@@ -74,7 +103,6 @@ async function fetchClassDetails(classId, idToken) {
         throw error;
     }
 }
-
 
 async function populateStudentDropdown(idToken) {
     const studentDropdown = document.getElementById("studentEmail");
@@ -203,7 +231,7 @@ async function removeStudentFromClass(classId, studentName, idToken) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                 'Authorization': `Bearer ${idToken}`
+                'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({
                 student: studentName,
@@ -372,5 +400,29 @@ async function removeFacultyFromClass(classId, facultyName, idToken) {
     } catch (error) {
         console.error("Error removing faculty:", error);
         alert("Failed to remove faculty. Please try again or contact support.");
+    }
+}
+
+async function deleteClass(classId, idToken) {
+    const apiUrl = `https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes/deleteclass`;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST', // Changed to POST
+            headers: {
+                'Authorization': `Bearer ${idToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ classId: classId }) // Send classId in the body
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to delete class, status: ${response.status}`);
+        }
+
+        return true; // Return true on success
+    } catch (error) {
+        console.error("Error deleting class:", error);
+        return false; // Return false on failure
     }
 }

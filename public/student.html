@@ -11,131 +11,88 @@
 
 <body>
     <div class="container">
+        <!-- Top Bar for Mobile -->
+        <div class="top-bar" id="topBar">
+            <button class="hamburger" id="hamburgerBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <button class="logout-btn mobile-logout" id="mobileLogoutBtn">
+                Log Out
+            </button>
+        </div>
         <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="profile">
-                <div class="profile-pic"></div>
-                <button class="copy-btn">
-                    <i class="fas fa-copy"></i>
-                </button>
-            </div>
-
+        <div class="sidebar" id="sidebar">
             <nav class="nav-menu">
-                <button><i class="fas fa-user"></i> Profile</button>
-                <button><i class="fas fa-bell"></i> Notifications</button>
-                <button><i class="fas fa-shield-alt"></i> Sign-in & Security</button>
-                <button><i class="fas fa-question-circle"></i> Help</button>
-                <button><i class="fas fa-cog"></i> Account Settings</button>
+                <button data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+                <button data-page="profile"><i class="fas fa-user"></i> Profile</button>
+                <button data-page="help"><i class="fas fa-question-circle"></i> Help</button>
             </nav>
-
-            <!-- Logout Button -->
-            <button class="logout-btn">
+            <!-- Logout Button (Desktop Only) -->
+            <button class="logout-btn desktop-logout" id="desktopLogoutBtn">
                 <i class="fas fa-sign-out-alt"></i> Log Out
             </button>
         </div>
-
+        <!-- Backdrop for mobile menu -->
+        <div class="backdrop" id="backdrop"></div>
         <!-- Main Content -->
-        <div class="main-content">
-            <h1>Welcome to Your Dashboard</h1>
-
-            <!-- Pending Tasks Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2><i class="fas fa-clock"></i> Pending Tasks</h2>
+        <div class="main-content" id="mainContent">
+            <div class="dashboard-content">
+                <div class="header">
+                    <h1>Welcome to Your Dashboard</h1>
+                    <button id="sosButton" class="sos-button">SOS</button>
                 </div>
-                <div class="card-content">
-                    <div class="task">
-                        <span>Submit Weekly Report</span>
-                        <span class="due">Due in 2 days</span>
+                <!-- Check-In Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-map-marker-alt"></i> Check-In</h2>
                     </div>
-                    <div class="task">
-                        <span>Update Contact Information</span>
-                        <span class="overdue">Overdue</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Current Location Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2><i class="fas fa-map-marker-alt"></i> Current Location</h2>
-                    <button id="getLocation" class="location-btn">Get Current Location</button>
-                </div>
-                <div class="card-content">
-                    <div class="location-info">
-                        <h3>Location Coordinates</h3>
-                        <div class="coordinates">
-                            <span id="coordinates">N/A</span>
-                            <button class="copy-btn" title="Copy coordinates">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                    <div class="card-content check-in-content">
+                        <!-- Location Info -->
+                        <div class="location-info">
+                            <h3>Current Location</h3>
+                            <div class="coordinates">
+                                <span id="coordinates">N/A</span>
+                                <button class="copy-btn" title="Copy coordinates">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <button id="getLocation" class="primary-btn">Get Current Location</button>
+                            <h3>Address:</h3>
+                            <p id="addressDisplay">N/A</p>
+                            <a href="#" target="_blank" id="mapsLink" class="maps-link">Open in Google Maps</a>
                         </div>
-                        <h3>Address:</h3>
-                        <p id="addressDisplay">N/A</p> <!-- Added for address display -->
-                        <a href="#" target="_blank" id="mapsLink" class="maps-link">Open in Google Maps</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Details Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2><i class="fas fa-info-circle"></i> Additional Details</h2>
-                    <button id="editDetails" class="edit-btn">
-                        <i class="fas fa-edit"></i> Update Details
-                    </button>
-                </div>
-                <div class="card-content">
-                    <div class="details-container">
-                        <!-- View Mode -->
-                        <div id="viewMode" class="details-view">
-                            <div class="detail-item">
-                                <label>My Peers</label>
-                                <p id="withWhomText">My Peers</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Current Place</label>
-                                <p id="currentPlaceText">123 Main St, College Station, TX 77840</p>
-                            </div>
-                            <div class="detail-item">
-                                <label>Additional Comments</label>
-                                <p id="commentsText">No additional comments</p>
-                            </div>
-                        </div>
-
-                        <!-- Edit Mode (initially hidden) -->
-                        <div id="editMode" class="details-edit hidden">
-
-                            <!-- code for with whom-->
-                            <div class="detail-item">
-                                <label>My Peers</label>
-                                <select id="withWhomInput" class="dropdown-select">
-                                    <!-- Options will be populated by JavaScript -->
+                        <!-- Check-in Details Form -->
+                        <div class="check-in-form">
+                            <h3>Check-In Details</h3>
+                            <div class="form-group">
+                                <label for="withWhomInput">My Peers</label>
+                                <p class="helper-text">Hold Ctrl/Cmd to select multiple students</p>
+                                <select id="withWhomInput" class="dropdown-select" multiple>
+                                    <option value="None">None</option>
                                 </select>
                             </div>
-                            <div class="detail-item">
-                                <label>Current Place</label>
-                                <input type="text" id="currentPlaceInput"
-                                    value="123 Main St, College Station, TX 77840">
+                            <div class="form-group">
+                                <label for="customStatusInput">Check-In Status</label>
+                                <select id="customStatusInput" class="dropdown-select">
+                                    <option value="None">None</option>
+                                </select>
                             </div>
-                            <div class="detail-item">
-                                <label>Additional Comments</label>
-                                <textarea id="commentsInput" placeholder="Add your comments here..."></textarea>
+                            <div class="form-group">
+                                <label for="currentPlaceInput">Current Place</label>
+                                <input type="text" id="currentPlaceInput" placeholder="e.g. Library, Cafeteria">
                             </div>
-                            <div class="edit-actions">
-                                <button id="saveDetails" class="save-btn">Save Changes</button>
-                                <button id="cancelEdit" class="cancel-btn">Cancel</button>
+                            <div class="form-group">
+                                <label for="commentsInput">Additional Comments</label>
+                                <textarea id="commentsInput" placeholder="Add any additional information here..."></textarea>
                             </div>
+                            <button id="checkInBtn" class="primary-btn">
+                                <i class="fas fa-check-circle"></i> Check In
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- SOS Button -->
-        <button class="sos-button">SOS</button>
-        <!-- SOS Button -->
-        <button id="sosButton" class="sos-button">SOS</button>
         <!-- Emergency Details Form (initially hidden) -->
         <div id="emergencyForm" class="emergency-form hidden">
             <div class="emergency-form-content">
@@ -148,8 +105,7 @@
                 </div>
             </div>
         </div>
-
-        <script type="module" src="js/student.js"></script>
-</body>
-
+    </div>
+    <script type="module" src="js/student.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9330a4cf4f407bde',t:'MTc0NTExMDE4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
