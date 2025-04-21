@@ -3,7 +3,7 @@ terraform {
     bucket         = "study-abroad-terraform-state-bucket"  # replace with your S3 bucket name
     key            = "study-abroad/terraform.tfstate"   # organize by env if needed
     region         = "us-east-1"                    # this must be hardcoded or parameterized via TF_VAR
-    use_lockfile   = true  # or false              # optional: for state locking
+    #use_lockfile   = true  # or false              # optional: for state locking
     encrypt        = true
   }
 

@@ -8,7 +8,6 @@ on:
         required: false
         default: "default"
 
-
 env:
   AWS_REGION: us-west-2
   TF_WORKING_DIR: terraform-project
@@ -19,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        working-directory: terraform-project
 
     steps:
       - name: Checkout Code
@@ -32,15 +31,28 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Export Terraform Outputs
         id: tf_outputs
         run: |
           echo "s3_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
           echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    outputs:
+      s3_bucket_name: ${{ steps.tf_outputs.outputs.s3_bucket_name }}
+      cloudfront_distribution_id: ${{ steps.tf_outputs.outputs.cloudfront_distribution_id }}
 
   deploy-lambda:
     name: Upload Lambda Code
@@ -64,7 +76,7 @@ jobs:
           aws lambda update-function-code \
             --function-name createUser \
             --zip-file fileb://createUser.zip \
-            --region ${{ env.AWS_REGION }}
+            --region us-west-2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -86,7 +98,7 @@ jobs:
           AWS_S3_BUCKET: ${{ needs.deploy-iac.outputs.s3_bucket_name }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_REGION: us-west-2
           SOURCE_DIR: public
 
       - name: Invalidate CloudFront Cache
@@ -94,6 +106,6 @@ jobs:
         env:
           DISTRIBUTION: ${{ needs.deploy-iac.outputs.cloudfront_distribution_id }}
           PATHS: '/*'
-          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_REGION: us-west-2
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
