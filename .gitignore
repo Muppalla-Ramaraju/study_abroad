@@ -1,5 +1,4 @@
 .terraform/
-*.zip
 *.log
 terraform.tfstate
 terraform.tfstate.backup
