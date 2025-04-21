@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         try {
             // Make API call to your backend Lambda function via API Gateway
-            const response = await fetch('https://cx1a7517y9.execute-api.us-west-1.amazonaws.com/prod/users', {
+            const response = await fetch('https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
