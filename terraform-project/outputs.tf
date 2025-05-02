@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-=======
 ##############################################
 # terraform-project/outputs.tf (root)
 ##############################################
 
->>>>>>> main
 # Outputs for the Cognito module
 output "user_pool_id" {
   value = module.cognito.user_pool_id
@@ -15,11 +12,7 @@ output "user_pool_client_id" {
 }
 
 output "user_pool_client_id_secret" {
-<<<<<<< HEAD
-  value = module.cognito.user_pool_client_id_secret
-=======
   value     = module.cognito.user_pool_client_id_secret
->>>>>>> main
   sensitive = true
 }
 
@@ -31,8 +24,6 @@ output "dynamodb_output" {
     user_profiles_table_name = module.dynamodb.user_profiles_table_name
   }
 }
-<<<<<<< HEAD
-=======
 
 # Outputs for the SNS module
 output "sns_topic_output" {
@@ -118,4 +109,3 @@ output "apigateway_studyabroad_stage_name" {
 output "apigateway_studyabroad_invoke_url" {
   value = module.apigateway-studyabroad.invoke_url
 }
->>>>>>> main
