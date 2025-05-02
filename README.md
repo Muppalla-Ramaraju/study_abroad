@@ -1,7 +1,9 @@
-# study_abroad
+# Study Abroad TAMU
 
 
 
 
 
-<img width="954" alt="image" src="https://github.com/user-attachments/assets/28fae9ba-6ebc-4293-bdcc-a236402e1261" />
+
+![image](https://github.com/user-attachments/assets/661db882-3d40-40e2-9d90-c2723f5ec299)
+
