@@ -1,5 +1,5 @@
 import { getSession, refreshTokens, logout, initSessionChecker } from './session.js';
-
+//Dummy copmment
 // Define API endpoint
 const API_ENDPOINT = 'https://cso6luevsi.execute-api.us-east-1.amazonaws.com/prod/classes';
 
