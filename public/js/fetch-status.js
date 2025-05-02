@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function fetchAndPopulateCustomStatuses() {
+    try {
         // Get student name from local storage
         const studentName = localStorage.getItem('name');
         if (!studentName) {
@@ -47,4 +48,7 @@ async function fetchAndPopulateCustomStatuses() {
             select.appendChild(option);
         });
 
+    } catch (error) {
+        console.error(error);
+    }
 }
