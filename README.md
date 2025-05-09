@@ -1,15 +1,15 @@
 # Study Abroad TAMU
 
 
-# System Architecture
-
-<img width="540" alt="image" src="https://github.com/user-attachments/assets/a1f42567-148e-411a-9c6d-adb367d7491b" />
 
 
 
 # Study Abroad System
 
 The Study Abroad System is a cloud-native application designed to ensure the safety and well-being of students while studying abroad. It provides an integrated communication platform for students, faculty, and administrators, allowing them to track locations, receive notifications, and respond promptly to safety-related alerts.
+
+
+
 
 ## Project Overview
 
@@ -25,6 +25,10 @@ This application serves three key user roles:
 - Emergency alerts and faculty oversight
 - Role-based access and system management
 - Custom check-in status creation
+
+# System Architecture
+
+<img width="540" alt="image" src="https://github.com/user-attachments/assets/a1f42567-148e-411a-9c6d-adb367d7491b" />
 
 ## Project Structure
 
