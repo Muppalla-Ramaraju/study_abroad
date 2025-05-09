@@ -1,7 +1,7 @@
 # Study Abroad TAMU
 
 
-
+![System Architecture]
 
 <img width="540" alt="image" src="https://github.com/user-attachments/assets/a1f42567-148e-411a-9c6d-adb367d7491b" />
 
@@ -56,7 +56,6 @@ The system is built using a serverless architecture with:
 - **Infrastructure**: Defined with Terraform
 - **CI/CD**: GitHub Actions
 
-![System Architecture](https://raw.githubusercontent.com/username/muppalla-ramaraju-study_abroad/main/architecture.png)
 
 ## Getting Started
 
